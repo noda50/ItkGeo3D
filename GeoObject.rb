@@ -54,6 +54,26 @@ class GeoObject
     @baz = baz ;
   end
 
+  #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## ensure a GeoObject (for class)
+  ## _aValue_:: a certain format or class of GeoObject
+  ## *return*:: a GeoObject
+  def self.sureGeoObject(_aValue)
+    raise ("sureGeoObject() should be defined in each class: class=" +
+           self.inspect) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## ensure a GeoObject (for instance)
+  ## _aValue_:: a certain format or class of GeoObject
+  ## *return*:: a GeoObject
+  def sureGeoObject(_aValue)
+    return self.class.sureGeoObject(_aValue) ;
+  end
+
   #--------------------------------------------------------------
   #++
   ## description of method foo

@@ -63,6 +63,33 @@ class Vector < GeoObject
     end
   end
 
+  #--::::::::::::::::::::::::::::::::::::::::
+  #------------------------------------------
+  #++
+  ## ensure a Vector.
+  ## _aValue_:: a Vector or [_x_, _y_]
+  ## *return* :: a Vector
+  def self.sureGeoObject(_aValue)
+    case _aValue ;
+    when Vector ;
+      return _aValue ;
+    when Array ;
+      return Vector.new(_aValue) ;
+    else
+      raise ("#{self}::sureGeoObject() does not support conversion from : " +
+             _aValue.inspect) ;
+    end
+  end
+
+  #------------------------------------------
+  #++
+  ## ensure a Vector.
+  ## _aValue_:: a Vector or [_x_, _y_]
+  ## *return* :: a Vector
+  def sureVector(_aValue) ;
+    return sureGeoObject(_aValue) ;
+  end
+
   #--------------------------------------------------------------
   #++
   ## set value
@@ -96,6 +123,16 @@ class Vector < GeoObject
     return self ;
   end
 
+  #--////////////////////////////////////////////////////////////
+  ## inc / dec / amp : modify self.
+  #--------------------------------------------------------------
+  #++
+  ## increment.
+  ## _aVector_:: amount of increment.
+  def inc(_aVector)
+    
+  end
+  
   #--------------------------------------------------------------
   #++
   ## description of method foo
@@ -118,6 +155,8 @@ end ; end ;
 if($0 == __FILE__) then
 
   require 'test/unit'
+
+  include Itk::Geo3D ;
 
   #--============================================================
   #++
@@ -143,12 +182,12 @@ if($0 == __FILE__) then
     #++
     ## let
     def test_a
-      v = Itk::Geo3D::Vector.new() ;
+      v = Vector.new() ;
       p [:v, :init, v] ;
       v.set(1,2,3) ;
       p [:v, :set123, v] ;
       
-      u = Itk::Geo3D::Vector.new(5,6,7) ;
+      u = Vector.new(5,6,7) ;
       p [:u, :init, u] ;
       v.set(u) ;
       p [:v, :setU, v] ;
@@ -157,11 +196,30 @@ if($0 == __FILE__) then
 
       v.set([4,3]) ;
       p [:v, :setA2, v] ;
-      
-#      v.set(4,3) ;
-#      p [:v, :setA3, v] ;
-      
+
+      begin
+        v.set(4,3) ;
+        p [:v, :setA3, v] ;
+      rescue => ex
+        pp [:raise, ex] ;
+      end
     end
+
+    #----------------------------------------------------
+    #++
+    ## sureGeoObject
+    def test_b
+      v = Vector.new() ;
+      [Vector.new(1,2,3), [4,5,6], 7, nil].each{|aValue|
+        begin
+          p [:sureGeoObject, aValue, Vector.sureGeoObject(aValue)] ;
+          p [:sureVector, aValue, v.sureVector(aValue)] ;
+        rescue => ex
+          pp [:rescue, ex.to_s, ex.backtrace[0...5]] ;
+        end
+      }
+    end
+    
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
