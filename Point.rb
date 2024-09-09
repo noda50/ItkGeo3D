@@ -1,11 +1,11 @@
 #! /usr/bin/env ruby
 ## -*- mode: ruby; coding: utf-8 -*-
-## = GeoObject class
+## = Geo3D Point class
 ## Author:: Itsuki Noda
-## Version:: 0.0 2024/09/07 I.Noda
+## Version:: 0.0 2024/09/09 I.Noda
 ##
 ## === History
-## * [2024/09/07]: Create This File.
+## * [2024/09/09]: Create This File.
 ## * [YYYY/MM/DD]: add more
 ## == Usage
 ## * ...
@@ -26,49 +26,52 @@ $LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;
-require 'WithConfParam.rb' ;
 
-require 'Utility.rb' ;
+require 'Vector.rb' ;
 
-
-module Itk ; module Geo3D
+module Itk ; module Geo3D ;
 #--======================================================================
 #++
-## 
-class GeoObject
-  include Geo3D
-  #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+## Itk::Geo3D::Point class
+class Point < Vector
+  #--::::::::::::::::::::::::::::::::::::::::
+  #------------------------------------------
   #++
-  ## description of attribute foo.
-#  attr :foo, true ;
-
-  #--////////////////////////////////////////////////////////////
-  #--------------------------------------------------------------
-  #++
-  ## ensure a GeoObject (for class)
-  ## _aValue_:: a certain format or class of GeoObject
-  ## *return*:: a GeoObject
+  ## ensure a Point
+  ## _aValue_:: a Point, Vector or [_x_, _y_]
+  ## *return* :: a Vector
   def self.sureGeoObject(_aValue)
-    raise ("sureGeoObject() should be defined in each class: class=" +
-           self.inspect) ;
+    case _aValue ;
+    when Point ;
+      return _aValue ;
+    when Vector ;
+      return Point.new(_aValue) ;
+    when Array ;
+      return Point.new(_aValue) ;
+    else
+      raise ("#{self}::sureGeoObject() does not support conversion from : " +
+             _aValue.inspect) ;
+    end
   end
 
   #------------------------------------------
   #++
-  ## ensure a GeoObject (for instance)
-  ## _aValue_:: a certain format or class of GeoObject
-  ## *return*:: a GeoObject
-  def sureGeoObject(_aValue)
-    return self.class.sureGeoObject(_aValue) ;
+  ## ensure a Point
+  ## _aValue_:: a Vector or [_x_, _y_]
+  ## *return* :: a Vector
+  def surePoint(_aValue) ;
+    return sureGeoObject(_aValue) ;
   end
+
 
   #--////////////////////////////////////////////////////////////
   #--============================================================
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #--------------------------------------------------------------
-end # class Foo
-end ; end
+end # class Point
+#--======================================================================
+end ; end # module Geo3D ; module Itk
 
 ########################################################################
 ########################################################################
@@ -76,6 +79,8 @@ end ; end
 if($0 == __FILE__) then
 
   require 'test/unit'
+
+  include Itk::Geo3D ;
 
   #--============================================================
   #++
@@ -99,10 +104,18 @@ if($0 == __FILE__) then
 
     #----------------------------------------------------
     #++
-    ## about test_a
+    ## sureGeoObject
     def test_a
-      pp [:test_a] ;
-      assert_equal("foo-",:foo.to_s) ;
+      v = Point.new() ;
+      [Point.new(0,1,2), Vector.new(1,2,3), [4,5,6], 7, nil].each{|aValue|
+        begin
+          p [:sureGeoObject, aValue, Point.sureGeoObject(aValue)] ;
+          p [:sureVector, aValue, v.sureVector(aValue)] ;
+          p [:surePoint, aValue, v.surePoint(aValue)] ;
+        rescue => ex
+          pp [:rescue, ex.to_s, ex.backtrace[0...5]] ;
+        end
+      }
     end
 
   end # class TC_Foo < Test::Unit::TestCase
