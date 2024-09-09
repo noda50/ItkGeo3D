@@ -90,6 +90,22 @@ class Vector < GeoObject
     return sureGeoObject(_aValue) ;
   end
 
+  #------------------------------------------
+  #++
+  ## convert to Array
+  ## *return* :: an Array [x,y,z]
+  def to_a()
+    return [@x, @y, @z] ;
+  end
+
+  #------------------------------------------
+  #++
+  ## convert to Hash
+  ## *return* :: an Hash { x: xVal, y: yVal, z: zVal }
+  def to_h()
+    return { x: @x, y: @y, z: @z } ;
+  end
+
   #--------------------------------------------------------------
   #++
   ## set value
@@ -128,11 +144,156 @@ class Vector < GeoObject
   #--------------------------------------------------------------
   #++
   ## increment.
-  ## _aVector_:: amount of increment.
+  ## _aVector_:: amount of increment. a Vector or an Array.
   def inc(_aVector)
+    _aVector = sureVector(_aVector) ;
+    @x += _aVector.x ;
+    @y += _aVector.y ;
+    @z += _aVector.z ;
     
+    return self ;
+  end
+
+  #------------------------------------------
+  #++
+  ## increment.
+  ## _aVector_:: amount of decrement. a Vector or an Array
+  def dec(_aVector)
+    _aVector = sureVector(_aVector) ;
+    @x -= _aVector.x ;
+    @y -= _aVector.y ;
+    @z -= _aVector.z ;
+    
+    return self ;
+  end
+
+  #------------------------------------------
+  #++
+  ## amplify
+  ## _factor_:: amount of amplify. a Numeric
+  def amp(_factor)
+    @x *= _factor ;
+    @y *= _factor ;
+    @z *= _factor ;
+    
+    return self ;
+  end
+
+  #--////////////////////////////////////////////////////////////
+  ## arithmetic operators: +, -, *, /
+  #--------------------------------------------------------------
+  #++
+  ## plus
+  ## _aVector_:: amount of increment. a Vector or an Array.
+  def +(_aVector)
+    return self.dup().inc(_aVector) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## minus
+  ## _aVector_:: amount of decrement. a Vector or an Array
+  def -(_aVector)
+    return self.dup().dec(_aVector) ;
   end
   
+  #------------------------------------------
+  #++
+  ## minus (single arity operator)
+  ## _aVector_:: amount of decrement. a Vector or an Array
+  def -@()
+    return self.dup().amp(-1) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## multiply by scalar
+  ## _factor_:: amount of amplify. a Numeric
+  def *(_factor)
+    return self.dup().amp(_factor) ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## divide by scalar
+  ## _factor_:: amount of divide. a Numeric
+  def /(_factor)
+    return self.dup().amp(1.0/_factor) ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
+  ## geometric operator
+  #--------------------------------------------------------------
+  #++
+  ## length
+  ## *return*:: scalar
+  def length()
+    return Math.sqrt(self.sqLength()) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## square length
+  ## *return*:: scalar
+  def sqLength()
+    return (@x * @x + @y * @y + @z * @z) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## unit vector
+  ## _unit_:: unit length. (default = 1.0) ;
+  ## *return*:: an unit Vector.
+  def unit(_unit = 1.0) ;
+    return self / (self.length()/_unit) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## inner product
+  ## _other_:: a Vector
+  ## *return*:: inner product in scalar.
+  def innerProd(_other)
+    return (self.x * _other.x + self.y * _other.y + self.z * _other.z) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## cosine of angle of two vector
+  ## _other_:: a Vector
+  ## *return*:: cosine value
+  def cos(_other)
+    return (innerProd(_other).to_f / (self.length() * _other.length())) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## arccosine of angle of two vector
+  ## _other_:: a Vector
+  ## *return*:: arccosine value in radiun
+  def acos(_other)
+    return Math::acos(self.cos(_other)) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## angle with other
+  ## _other_:: a Vector
+  ## *return*:: arccosine value in radian
+  def angle(_other)
+    return self.acos(_other) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## angle with other in degree
+  ## _other_:: a Vector
+  ## *return*:: arccosine value in degree
+  def angleInDeg(_other)
+    return rad2deg(self.angle(_other)) ;
+  end
+  
+
   #--------------------------------------------------------------
   #++
   ## description of method foo
@@ -219,6 +380,47 @@ if($0 == __FILE__) then
         end
       }
     end
+
+    #----------------------------------------------------
+    #++
+    ## add, etc.
+    def test_c
+      v = Vector.new(1,2,3) ;
+      p [:init, v] ;
+      v.inc([4,5,6]) ;
+      p [:inc, v] ;
+      v.dec([7,6,5]) ;
+      p [:dec, v] ;
+      v.amp(10) ;
+      p [:amp, v] ;
+
+      p [:+, v + [5,4,3], v] ;
+      p [:-, v - [5,4,3], v] ;
+      p [:-@, -v, v] ;
+      p [:*, v * 100, v] ;
+      p [:/, v / 100, v] ;
+    end
+
+    #----------------------------------------------------
+    #++
+    ## geometric operators
+    def test_d
+      v0 = Vector.new(2,4,4) ;
+      p [:v0, v0] ;
+      p [:length, v0.length()] ;
+      p [:unit, v0.unit()] ;
+      p [:unit2, v0.unit(2)] ;
+
+      v1 = Vector.new(1,2,3) ;
+      p [:v1, v1] ;
+      p [:innerProd, v0.innerProd(v1)] ;
+      p [:cos, v0.cos(v1)] ;
+      p [:acos, v0.acos(v1)] ;
+      p [:angle, v0.angle(v1)] ;
+      p [:angleDeg, v0.angleInDeg(v1)] ;
+    end
+    
+    
     
 
   end # class TC_Foo < Test::Unit::TestCase
