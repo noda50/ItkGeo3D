@@ -27,6 +27,7 @@ $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;
 require 'WithConfParam.rb' ;
+require 'Itk/ItkPp.rb' ;
 
 require 'Utility.rb' ;
 
@@ -37,6 +38,8 @@ module Itk ; module Geo3D
 ## 
 class GeoObject
   include Geo3D
+  include ItkPp
+  
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #++
   ## description of attribute foo.
@@ -63,11 +66,51 @@ class GeoObject
   end
 
   #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## distance to other point.
+  ## _toGeoObj_:: to GeoObject
+  def distanceTo(_toGeoObj)
+    case(_toGeoObj)
+    when Point ;
+      return distanceToPoint(_toGeoObj) ;
+    else
+      raise ("#{self.class}#distanceTo() does not support for _toGeoObj:" +
+             _toGeoObj) ;
+    end
+  end
+  
+  #------------------------------------------
+  #++
+  ## distance from other point.
+  ## _fromGeoObj_:: from GeoObject
+  def distanceFrom(_fromGeoObj)
+    return distanceTo(_fromGeoObj) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## distance from other point.
+  ## _fromGeoObj_:: from GeoObject
+  def distanceToPoint(_fromGeoObj)
+    raise ("#{self.class}#distanceToPoint() does not support for _toGeoObj:" +
+           _toGeoObj) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## distance from LineSegment
+  ## _fromGeoObj_:: from LineSegment
+  def distanceToLineSegment(_fromGeoObj)
+    return _fromGeoObj.distanceTo(self) ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
   #--============================================================
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #--------------------------------------------------------------
-end # class Foo
+end # class GeoObject
 end ; end
 
 ########################################################################

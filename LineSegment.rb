@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 ## -*- mode: ruby; coding: utf-8 -*-
-## = Geo3D Point class
+## = Itk::Geo3D::LineSegment class
 ## Author:: Itsuki Noda
 ## Version:: 0.0 2024/09/09 I.Noda
 ##
@@ -27,59 +27,84 @@ $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;
 
-require 'Vector.rb' ;
+require 'Point.rb' ;
+
+
 
 module Itk ; module Geo3D ;
 #--======================================================================
 #++
-## Itk::Geo3D::Point class
-class Point < Vector
-  #--::::::::::::::::::::::::::::::::::::::::
-  #------------------------------------------
+## Line Segment class
+class LineSegment < GeoObject
+  #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #++
-  ## ensure a Point
-  ## _aValue_:: a Point, Vector or [_x_, _y_]
-  ## *return* :: a Point
-  def self.sureGeoObject(_aValue)
-    case _aValue ;
-    when Point ;
-      return _aValue ;
-    when Vector ;
-      return Point.new(_aValue) ;
-    when Array ;
-      return Point.new(_aValue) ;
-    else
-      raise ("#{self}::sureGeoObject() does not support conversion from : " +
-             _aValue.inspect) ;
-    end
-  end
-
-  #--::::::::::::::::::::::::::::::::::::::::
-  #------------------------------------------
-  #++
-  ## ensure a Point. (for class)
-  ## _aValue_:: a Point, Vector or [_x_, _y_]
-  ## *return* :: a Point
-  def self.surePoint(_aValue) ;
-    return self.sureGeoObject(_aValue) ;
-  end
+  ## Default Point class
+  PointClass = Point ;
+  ## Default Vector class
+  VectorClass = Vector ;
   
-  #------------------------------------------
+  #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #++
-  ## ensure a Point
-  ## _aValue_:: a Point, Vector or [_x_, _y_]
-  ## *return* :: a Point
-  def surePoint(_aValue) ;
-    return sureGeoObject(_aValue) ;
-  end
+  ## start point
+  attr :u, true ;
+  ## end point
+  attr :v, true ;
 
-  #--////////////////////////////////////////////////////////////
   #--------------------------------------------------------------
   #++
-  ## distance to other point.
-  ## _toPoint_:: to Point
-  def distanceToPoint(_toPoint)
-    return (self - _toPoint).length() ;
+  ## inisialization.
+  ## _u_:: start point
+  ## _v_:: end point
+  ## _dupP_:: flag to duplicate _U_ and _v_.
+  def initialize(_u = self.class::PointClass::new(), 
+                 _v = self.class::PointClass::new(),
+                 _dupP = false)
+    set(_u,_v,_dupP) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## set
+  ## _u_:: start point
+  ## _v_:: end point
+  ## _dupP_:: flag to duplicate _U_ and _v_.
+  def set(_u,_v,_dupP = false)
+    _u = PointClass::sureGeoObject(_u) ;
+    _v = PointClass::sureGeoObject(_v) ;
+    @u = (_dupP ? _u.dup() : _u) ;
+    @v = (_dupP ? _v.dup() : _v) ;
+
+    return self ;
+  end
+
+  #------------------------------------------
+  #++
+  ## duplicate
+  ## _deepP_:: flag to deep duplicate.
+  def dup(_deepP = true)
+    _lSeg = clone() ; 
+    if(_deepP)
+        _lSeg.u = self.u.dup() ;
+        _lSeg.v = self.v.dup() ;
+    end
+    return _lSeg ;
+  end
+
+  #------------------------------------------
+  #++
+  ## reverse
+  ## _dupP_:: flag to duplicate
+  def reverse(dupP = false)
+    return self.class.new(self.v, self.u, dupP) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## shift
+  ## _drift_:: amount of drift. a Vector.
+  ## *return*:: a shifted Vector.
+  def length()
+    return @u.distanceTo(@v)
   end
 
   #--////////////////////////////////////////////////////////////
@@ -87,9 +112,10 @@ class Point < Vector
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #--------------------------------------------------------------
-end # class Point
+end # class LineSegment
 #--======================================================================
 end ; end # module Geo3D ; module Itk
+
 
 ########################################################################
 ########################################################################
@@ -122,29 +148,26 @@ if($0 == __FILE__) then
 
     #----------------------------------------------------
     #++
-    ## sureGeoObject
+    ## init, dup
     def test_a
-      v = Point.new() ;
-      [Point.new(0,1,2), Vector.new(1,2,3), [4,5,6], 7, nil].each{|aValue|
-        begin
-          p [:sureGeoObject, aValue, Point.sureGeoObject(aValue)] ;
-          p [:sureVector, aValue, v.sureVector(aValue)] ;
-          p [:sureVectorClass, aValue, Vector.sureVector(aValue)] ;
-          p [:surePoint, aValue, v.surePoint(aValue)] ;
-        rescue => ex
-          pp [:rescue, ex.to_s, ex.backtrace[0...5]] ;
-        end
-      }
+      line0 = LineSegment.new() ;
+      p [:line0, line0] ;
+      line1 = LineSegment.new([1,2,3],[5,6,7]) ;
+      p [:line1, line1] ;
+      line2 = line1.dup() ;
+      p [:line2, :dup, line2] ;
+      line3 = line1.reverse() ;
+      p [:line3, :rev, line3] ;
     end
 
     #----------------------------------------------------
     #++
-    ## distanceTo
+    ## distance
     def test_b
-      v0 = Point.new(0,1,2) ;
-      v1 = Point.new(5,5,5) ;
-      p [:distanceTo, v0.distanceTo(v1)] ;
-      p [:distanceFrom, v0.distanceFrom(v1)] ;
+      line0 = LineSegment.new([0,0,0],[1,1,1]) ;
+      p [:line0, line0] ;
+      p [:length, line0.length()] ;
+      
     end
     
 

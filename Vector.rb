@@ -74,9 +74,19 @@ class Vector < GeoObject
     end
   end
 
+  #--::::::::::::::::::::::::::::::::::::::::
   #------------------------------------------
   #++
-  ## ensure a Vector.
+  ## ensure a Vector. (for class)
+  ## _aValue_:: a Vector or [_x_, _y_]
+  ## *return* :: a Vector
+  def self.sureVector(_aValue) ;
+    return self.sureGeoObject(_aValue) ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## ensure a Vector. (for instance)
   ## _aValue_:: a Vector or [_x_, _y_]
   ## *return* :: a Vector
   def sureVector(_aValue) ;
@@ -226,6 +236,14 @@ class Vector < GeoObject
 
   #------------------------------------------
   #++
+  ## norm
+  ## *return*:: scalar
+  def norm()
+    return length() ;
+  end
+
+  #------------------------------------------
+  #++
   ## square length
   ## *return*:: scalar
   def sqLength()
@@ -285,7 +303,131 @@ class Vector < GeoObject
   def angleInDeg(_other)
     return rad2deg(self.angle(_other)) ;
   end
+
+  #------------------------------------------
+  #++
+  ## rotate around X asis
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.
+  def rotateByX(_angle)
+    return dup().rotateByX!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around X asis (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.(self)
+  def rotateByX!(_angle)
+    _c = Math::cos(_angle) ;
+    _s = Math::sin(_angle) ;
+    set(@x,
+        _c * @y - _s * @z,
+        _s * @y + _c * @z) ;
+    return self ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around X asis in degree
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.
+  def rotateByXInDeg(_angle)
+    return dup().rotateByXInDeg!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around X asis in degree (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.(self)
+  def rotateByXInDeg!(_angle)
+    return rotateByX!(deg2rad(_angle)) ;
+  end
   
+  
+  #------------------------------------------
+  #++
+  ## rotate around Y asis
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector 
+  def rotateByY(_angle)
+    return dup().rotateByY!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around Y asis (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector
+  def rotateByY!(_angle)
+    _c = Math::cos(_angle) ;
+    _s = Math::sin(_angle) ;
+    set(_s * @z + _c * @x,
+        @y,
+        _c * @z - _s * @x) ;
+    return self ;
+  end
+  
+  #----------------------
+  #++
+  ## rotate around Y asis in degree
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.
+  def rotateByYInDeg(_angle)
+    return dup().rotateByYInDeg!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around Y asis in degree (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.(self)
+  def rotateByYInDeg!(_angle)
+    return rotateByY!(deg2rad(_angle)) ;
+  end
+  
+  
+  #------------------------------------------
+  #++
+  ## rotate around Z asis
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector 
+  def rotateByZ(_angle)
+    return dup().rotateByZ!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around Z asis (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector
+  def rotateByZ!(_angle)
+    _c = Math::cos(_angle) ;
+    _s = Math::sin(_angle) ;
+    set(_c * @x - _s * @y,
+        _s * @x + _c * @y,
+        @z) ;
+    return self ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around Z asis in degree
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.
+  def rotateByZInDeg(_angle)
+    return dup().rotateByZInDeg!(_angle) ;
+  end
+
+  #----------------------
+  #++
+  ## rotate around Z asis in degree (modify self)
+  ## _angle_:: angle to rotate
+  ## *return*:: rotated Vector.(self)
+  def rotateByZInDeg!(_angle)
+    return rotateByZ!(deg2rad(_angle)) ;
+  end
 
   #--////////////////////////////////////////////////////////////
   #--============================================================
@@ -405,6 +547,21 @@ if($0 == __FILE__) then
       p [:angle, v0.angle(v1)] ;
       p [:angleDeg, v0.angleInDeg(v1)] ;
     end
+
+    #----------------------------------------------------
+    #++
+    ## rotate
+    def test_e
+      v = Vector.new(1,2,3) ;
+      p [:v, v] ;
+      p [:rotateByX, v.rotateByX(PI / 3)] ;
+      p [:rotateByY, v.rotateByY(PI / 3)] ;
+      p [:rotateByZ, v.rotateByZ(PI / 3)] ;
+      p [:rotateByXInDeg, v.rotateByXInDeg(60)] ;
+      p [:rotateByYInDeg, v.rotateByYInDeg(60)] ;
+      p [:rotateByZInDeg, v.rotateByZInDeg(60)] ;
+    end
+    
     
     
     
