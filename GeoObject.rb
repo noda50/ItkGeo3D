@@ -104,6 +104,61 @@ class GeoObject
   def distanceToLineSegment(_fromGeoObj)
     return _fromGeoObj.distanceTo(self) ;
   end
+
+  #--////////////////////////////////////////////////////////////
+  # bbox and min/max XYZ
+  #--------------------------------------------------------------
+  #++
+  ## minX
+  def minX()
+    raise "minX() has not been defined in class : #{self.class().to_s}"
+  end
+
+  #------------------------------------------
+  #++
+  ## maxX
+  def maxX()
+    raise "maxX() has not been defined in class : #{self.class().to_s}"
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minY
+  def minY()
+    raise "minY() has not been defined in class : #{self.class().to_s}"
+  end
+
+  #------------------------------------------
+  #++
+  ## maxY
+  def maxY()
+    raise "maxY() has not been defined in class : #{self.class().to_s}"
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minZ
+  def minZ()
+    raise "minZ() has not been defined in class : #{self.class().to_s}"
+  end
+
+  #------------------------------------------
+  #++
+  ## maxZ
+  def maxZ()
+    raise "maxZ() has not been defined in class : #{self.class().to_s}"
+  end
+  
+  #--////////////////////////////////////////////////////////////
+  # conversion
+  #--------------------------------------------------------------
+  #++
+  ## convert to JSON Hash
+  ## *return* :: a JSON in Hash.
+  def toJson()
+    _json = { class: self.class.to_s } ;
+    _json.update!(self.to_h) ;
+  end
   
   #--////////////////////////////////////////////////////////////
   #--============================================================

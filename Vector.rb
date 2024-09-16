@@ -104,7 +104,7 @@ class Vector < GeoObject
   #------------------------------------------
   #++
   ## convert to Hash
-  ## *return* :: an Hash { x: xVal, y: yVal, z: zVal }
+  ## *return* :: a Hash { x: xVal, y: yVal, z: zVal }
   def to_h()
     return { x: @x, y: @y, z: @z } ;
   end
@@ -428,6 +428,51 @@ class Vector < GeoObject
   def rotateByZInDeg!(_angle)
     return rotateByZ!(deg2rad(_angle)) ;
   end
+
+  #--////////////////////////////////////////////////////////////
+  # bbox and min/max XYZ
+  #--------------------------------------------------------------
+  #++
+  ## minX
+  def minX()
+    return @x ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxX
+  def maxX()
+    return @x ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minY
+  def minY()
+    return @y ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxY
+  def maxY()
+    return @y ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minZ
+  def minZ()
+    return @z ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxZ
+  def maxZ()
+    return @z ;
+  end
+  
 
   #--////////////////////////////////////////////////////////////
   #--============================================================

@@ -107,6 +107,105 @@ class LineSegment < GeoObject
     return @u.distanceTo(@v)
   end
 
+  #------------------------------------------
+  #++
+  ## difference Vector
+  ## *return*:: a difference Vector.
+  def diffVector()
+    return @v - @u ;
+  end
+
+  #--////////////////////////////////////////////////////////////
+  # 推薦
+  #--------------------------------------------------------------
+  #++
+  ## 垂線の足のある位置の u からの比率 k を求める
+  def footPointRatioFrom(_point, _extendP = true)
+    _diff = self.diffVector() ;
+    _rVec = @u - _point ;
+    _d = _diff.sqLength() ;
+    if(_d == 0.0)	# to avoid zero divide
+        _k = 0.0 ;
+    else
+      k = _diff.innerProd(_rVec) / _d ;
+    end
+
+    ## adjust k if non-extendP mode.
+    if(!_extendP) then
+      if(_k < 0.0)
+        _k = 0.0 ;
+      elsif(_k > 1.0)
+        _k = 1.0 ;
+      end
+    end
+      
+    return _k ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 垂線の足のある位置の u からの距離を求める
+  def footPointSpanFrom(_point, _extendP = true)
+    _k = footPointRatioFrom(_point, _extendP) ;
+    return _k * length() ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 垂線の足のある位置。extendP が false の時は線分としての最近点
+  def footPointFrom(_point, _extendP = false)
+    _k = footPointRatioFrom(_point, _extendP) ;
+
+    _foot = @u + diffVector().amplify(_k) ;
+
+    return _foot ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
+  # bbox and min/max XYZ
+  #--------------------------------------------------------------
+  #++
+  ## minX
+  def minX()
+    return min(@u.x, @v.x) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxX
+  def maxX()
+    return max(@u.x, @v.x) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minY
+  def minY()
+    return min(@u.y, @v.y) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxY
+  def maxY()
+    return max(@u.y, @v.y) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## minZ
+  def minZ()
+    return min(@u.z, @v.z) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## maxZ
+  def maxZ()
+    return max(@u.z, @v.z) ;
+  end
+  
+
   #--////////////////////////////////////////////////////////////
   #--============================================================
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -162,14 +261,14 @@ if($0 == __FILE__) then
 
     #----------------------------------------------------
     #++
-    ## distance
+    ## distance, min/max
     def test_b
-      line0 = LineSegment.new([0,0,0],[1,1,1]) ;
+      line0 = LineSegment.new([1,0,-1],[-1,4,3]) ;
       p [:line0, line0] ;
       p [:length, line0.length()] ;
-      
+      p [:min, line0.minX(), line0.minY(), line0.minZ()] ;
+      p [:max, line0.maxX(), line0.maxY(), line0.maxZ()] ;
     end
-    
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
