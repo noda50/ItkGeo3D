@@ -120,15 +120,14 @@ class LineSegment < GeoObject
   #--------------------------------------------------------------
   #++
   ## 垂線の足のある位置の u からの比率 k を求める
+  ## _point_:: 垂線推薦を下ろす点。
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちら簡単点(0 or 1)となる。
   def footPointRatioFrom(_point, _extendP = true)
     _diff = self.diffVector() ;
-    _rVec = @u - _point ;
+    _rVec = _point - @u ;
     _d = _diff.sqLength() ;
-    if(_d == 0.0)	# to avoid zero divide
-        _k = 0.0 ;
-    else
-      k = _diff.innerProd(_rVec) / _d ;
-    end
+    _k = ((_d == 0.0) ? 0.0 : (_diff.innerProd(_rVec).to_f / _d) ) ;
 
     ## adjust k if non-extendP mode.
     if(!_extendP) then
@@ -138,13 +137,15 @@ class LineSegment < GeoObject
         _k = 1.0 ;
       end
     end
-      
+
     return _k ;
   end
 
   #------------------------------------------
   #++
   ## 垂線の足のある位置の u からの距離を求める
+  ## _point_:: 垂線を下ろす点
+  ## _extendP_:: 線分の延長線上を許すかどうか。許さない場合、端点となる。
   def footPointSpanFrom(_point, _extendP = true)
     _k = footPointRatioFrom(_point, _extendP) ;
     return _k * length() ;
@@ -152,11 +153,13 @@ class LineSegment < GeoObject
 
   #------------------------------------------
   #++
-  ## 垂線の足のある位置。extendP が false の時は線分としての最近点
+  ## 垂線の足(最近点)のある位置。extendP が false の時は線分としての最近点
+  ## _point_:: 垂線を下ろす点
+  ## _extendP_:: 線分の延長線上を許すかどうか。許さない場合、端点となる。
   def footPointFrom(_point, _extendP = false)
     _k = footPointRatioFrom(_point, _extendP) ;
 
-    _foot = @u + diffVector().amplify(_k) ;
+    _foot = @u + diffVector().amp(_k) ;
 
     return _foot ;
   end
@@ -206,6 +209,29 @@ class LineSegment < GeoObject
   end
   
 
+  #--////////////////////////////////////////////////////////////
+  # convert
+  #--------------------------------------------------------------
+  #++
+  ## to array
+  def to_a()
+    return [@u.to_a, @v.to_a] ;
+  end
+
+  #------------------------------------------
+  #++
+  ## to array
+  def to_h()
+    return { u: @u.to_h, v: @v.to_h } ;
+  end
+
+  #------------------------------------------
+  #++
+  ## to array
+  def toJsonh()
+    return { class: self.class.to_s, u: @u.toJson(), v: @v.toJson()} ;
+  end
+  
   #--////////////////////////////////////////////////////////////
   #--============================================================
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -269,6 +295,19 @@ if($0 == __FILE__) then
       p [:min, line0.minX(), line0.minY(), line0.minZ()] ;
       p [:max, line0.maxX(), line0.maxY(), line0.maxZ()] ;
     end
+
+    #----------------------------------------------------
+    #++
+    ## 垂線
+    def test_c
+      l0 = LineSegment.new([0,0,0],[1,1,1]) ;
+#      p0 = Point.new([0,1,0]) ;
+      p0 = Point.new([0,-1,0]) ;      
+      p [:lp, l0.toJson, p0.to_a] ;
+      p [:foot, l0.footPointFrom(p0).to_a] ;
+      p [:foot, l0.footPointFrom(p0,true).to_a] ;
+    end
+    
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
