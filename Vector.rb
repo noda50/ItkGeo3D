@@ -29,6 +29,7 @@ require 'optparse' ;
 require 'pp' ;
 
 require 'GeoObject.rb' ;
+require 'Quaternion.rb' ;
 
 module Itk ; module Geo3D ;
 #--======================================================================
@@ -430,6 +431,28 @@ class Vector < GeoObject
   end
 
   #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## 四元数による一般の回転
+  ## _angle_:: 回転角 (radian)
+  ## _axis_:: 回転軸方向ベクトル
+  ## _origin_:: 回転原点
+  def rotate(_angle, _axis, _origin = Vector.new(0.0,0.0,0.0))
+    _offset = self - _origin ;
+    _offQuat = Quaternion.new(0.0, _offset.x, _offset.y, _offset.z)
+    
+    _u = sureVector(_axis).unit() ;
+    _cos = Math.cos(_angle/2.0) ;
+    _sin = Math.sin(_angle/2.0) ;
+    _rotQuat = Quaternion.new(_cos, _u.x * _sin, _u.y * _sin, _u.z * _sin) ;
+
+    _resQuat = (_rotQuat * _offQuat) * _rotQuat.conj() ;
+    _newVec = sureVector(_origin) + [_resQuat.i, _resQuat.j, _resQuat.k] ;
+
+    return _newVec ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
   # bbox and min/max XYZ
   #--------------------------------------------------------------
   #++
@@ -606,10 +629,19 @@ if($0 == __FILE__) then
       p [:rotateByYInDeg, v.rotateByYInDeg(60)] ;
       p [:rotateByZInDeg, v.rotateByZInDeg(60)] ;
     end
-    
-    
-    
-    
+
+    #----------------------------------------------------
+    #++
+    ## rotate by Quaternion
+    def test_f
+      v = Vector.new(1,2,3) ;
+      p [:v, v] ;
+      p [:rotateByX0, v.rotate(PI/3, [1, 0, 0], [0,0,0])] ;
+      p [:rotateByX0a, v.rotateByX(PI/3)] ;
+      p [:rotateByX1, v.rotate(PI/3, [1, 0, 0], [1,1,1])] ;
+      p [:rotateByXY0, v.rotate(PI/3, [1, 1, 0], [0,0,0])] ;
+      p [:rotateByXYZ0, v.rotate(PI/3, [1, 1, 1], [0,0,0])] ;
+    end
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
