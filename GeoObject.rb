@@ -150,6 +150,25 @@ class GeoObject
   end
   
   #--////////////////////////////////////////////////////////////
+  # Draw
+  #--------------------------------------------------------------
+  #++ 
+  ## draw by gnuplot
+  ## _gplot_:: a Gnuplot object.
+  ## _drawId_:: key in multi-plot.
+  def draw(_gplot, _drawId = self.drawId())
+    raise "draw() has not been defined in class : #{self.class().to_s}" 
+  end
+  
+  #--------------------------------------------------------------
+  #++
+  ## plot ID for the object
+  def drawId()
+    @_drawId = ppObjectName(true) if(@_drawId.nil?) ;
+    return @_drawId ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
   # conversion
   #--------------------------------------------------------------
   #++
@@ -157,9 +176,9 @@ class GeoObject
   ## *return* :: a JSON in Hash.
   def toJson()
     _json = { class: self.class.to_s } ;
-    _json.update!(self.to_h) ;
+    _json.update(self.to_h) ;
   end
-  
+
   #--////////////////////////////////////////////////////////////
   #--============================================================
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

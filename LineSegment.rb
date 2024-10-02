@@ -116,13 +116,13 @@ class LineSegment < GeoObject
   end
 
   #--////////////////////////////////////////////////////////////
-  # 推薦
+  # 垂線
   #--------------------------------------------------------------
   #++
   ## 垂線の足のある位置の u からの比率 k を求める
   ## _point_:: 垂線推薦を下ろす点。
   ## _extendP_:: 足として線分外も許すかどうか。
-  ##             線分外を許さない(false)の場合、どちら簡単点(0 or 1)となる。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   def footPointRatioFrom(_point, _extendP = true)
     _diff = self.diffVector() ;
     _rVec = _point - @u ;
@@ -164,6 +164,116 @@ class LineSegment < GeoObject
     return _foot ;
   end
   
+  #--////////////////////////////////////////////////////////////
+  # 2線分の最近点
+  #--------------------------------------------------------------
+  #++
+  ## 2つの線分の最近点の分率対を求める。
+  ## 考え方：
+  ##   線分 U:(U0,U1), V:(V0,V1) を考える。U0,U1,V0,V1 は端点を表すベクトル。
+  ##     U上の点 Rp= (1-p) U0 + p U1 。
+  ##     V上の点 Rq= (1-q) V0 + q V1 。
+  ##   線分R:(Rp,R1)とすると、
+  ##     Rの方向 = Rq-Rp = q(V1-V0) - p(U1-U0) + (V0-U0)
+  ##   線分 R:(Rp,Rq) は U, V に直交する。よって、
+  ##     (Rq-Rp)(U1-U0) = 0
+  ##     (Rq-Rp)(V1-V0) = 0
+  ##   よって、
+  ##     q(U1-U0)(V1-V0) - p(U1-U0)^2 + (V0-U0)(U1-U0) = 0
+  ##     q(V1-V0)^2 - p(U1-U0)(V1-V0) + (V0-U0)(V1-V0) = 0
+  ##   ここで、
+  ##     a = (U1-U0)^2
+  ##     b = (V1-V0)^2
+  ##     c = (U1-U0)(V1-V0)
+  ##     g = (V0-U0)(U1-U0)
+  ##     h = (V0-U0)(V1-V0)
+  ##   としておくと、(以下、2行で行列・ベクトル)
+  ##     [-a c] [p] = [-g]
+  ##     [-c b] [q] = [-h]
+  ##   左辺の行列の行列式は det = c^2 - ab となるので、
+  ##   [p,q] の解は、
+  ##     [p] = 1/    [b -c] [-g]
+  ##     [q] =  /det [c -a] [-h]
+  ##   つまり、
+  ##     p = (1/det) (-bg + ch)
+  ##     q = (1/det) (-cg + ah)
+  ##   なお、det = 0 となるのは、
+  ##     ab = c^2
+  ##   つまり、
+  ##     (U1-U0)^2 (V1-V0)^2 = ((U1-U0)(V1-V0))^2
+  ##   これは、線分U,Vが平行の場合。
+  ##   この場合は、p=q=0 として問題はない。
+  ## _line_:: もう一つの LineSetment
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: [p,q] の組。
+  def closestFractionPairWith(_line, _extendP = false)
+    _dU = self.diffVector() ;
+    _dV = _line.diffVector() ;
+    _dUV = _line.u - self.u ;
+    _a = _dU.innerProd(_dU) ;
+    _b = _dV.innerProd(_dV) ;
+    _c = _dU.innerProd(_dV) ;
+    _g = _dUV.innerProd(_dU) ;
+    _h = _dUV.innerProd(_dV) ;
+    _det = _c^2 - _a * _b ;
+
+    if(isAlmostZero(_det)) then
+      _p = 0.0 ;
+      _q = 0.0 ;
+    else
+      _p = (_c * _h - _b * _g).to_f/_det ;
+      _q = (_a * _h - _c * _g).to_f/_det ;
+    end
+
+    if(!_extendP) then
+      _p = 0.0 if(_p < 0.0) ;
+      _p = 1.0 if(_p > 1.0) ;
+      _q = 0.0 if(_q < 0.0) ;
+      _q = 1.0 if(_q > 1.0) ;
+    end
+
+    return [_p, _q] ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 2つの線分の最近点を求める。
+  ## _line_:: もう一つの LineSetment
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: self と _line_ 上の点の組 [p,q]。
+  def closestPointPairWith(_line, _extendP = false)
+    (_p, _q) = self.closestFractionPairWith(_line, _extendP) ;
+    _pointP = self.u * (1.0-_p) + self.v * _p ;
+    _pointQ = _line.u * (1.0-_q) + _line.v * _q ;
+    return [_pointP, _pointQ] ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 2つの線分の最短距離を求める。
+  ## _line_:: もう一つの LineSetment
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: 最短距離。
+  def closestDistanceWith(_line, _extendP = false)
+    (_pointP, _pointQ) = self.closestPointPairWith(_line, _extendP) ;
+    return _pointP.distanceTo(_pointQ) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 2つの線分の最短距離となる線分を求める。
+  ## _line_:: もう一つの LineSetment
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: 最短距離となる LineSegment
+  def closestLineSegmentWith(_line, _extendP = false)
+    (_pointP, _pointQ) = self.closestPointPairWith(_line, _extendP) ;
+    return self.class.new(_pointP, _pointQ) ;
+  end
+
   #--////////////////////////////////////////////////////////////
   # bbox and min/max XYZ
   #--------------------------------------------------------------
@@ -220,16 +330,28 @@ class LineSegment < GeoObject
 
   #------------------------------------------
   #++
-  ## to array
+  ## to Hash
   def to_h()
     return { u: @u.to_h, v: @v.to_h } ;
   end
 
   #------------------------------------------
   #++
-  ## to array
-  def toJsonh()
+  ## to json
+  def toJson()
     return { class: self.class.to_s, u: @u.toJson(), v: @v.toJson()} ;
+  end
+
+  #--////////////////////////////////////////////////////////////
+  # draw
+  #--------------------------------------------------------------
+  #++ 
+  ## draw by gnuplot
+  ## _gplot_:: a Gnuplot object.
+  ## _drawId_:: key in multi-plot.
+  def draw(_gplot, _drawId = self.drawId())
+    _line = to_a() ;
+    _gplot.dm3pPlotLine(_drawId, _line) ;
   end
   
   #--////////////////////////////////////////////////////////////
@@ -248,6 +370,7 @@ end ; end # module Geo3D ; module Itk
 if($0 == __FILE__) then
 
   require 'test/unit'
+  require 'gnuplot.rb' ;
 
   include Itk::Geo3D ;
 
@@ -301,12 +424,78 @@ if($0 == __FILE__) then
     ## 垂線
     def test_c
       l0 = LineSegment.new([0,0,0],[1,1,1]) ;
-#      p0 = Point.new([0,1,0]) ;
-      p0 = Point.new([0,-1,0]) ;      
-      p [:lp, l0.toJson, p0.to_a] ;
-      p [:foot, l0.footPointFrom(p0).to_a] ;
-      p [:foot, l0.footPointFrom(p0,true).to_a] ;
+      p0 = Point.new([0,1,0]) ;
+      p1 = Point.new([0,-1,0]) ;      
+      p [:lp, l0.toJson, p0.to_a, p1.to_a] ;
+      foot00 = l0.footPointFrom(p0) ;
+      foot01 = l0.footPointFrom(p0,true) ;
+      foot10 = l0.footPointFrom(p1) ;
+      foot11 = l0.footPointFrom(p1,true) ;
+      p [:foot00, foot00.to_a] ;
+      p [:foot01, foot01.to_a] ;
+      p [:foot10, foot10.to_a] ;
+      p [:foot11, foot11.to_a] ;
+      fl00 = LineSegment.new(p0, foot00) ;
+
+      gconf = {
+        styleTable: {
+          l0: { lw: 3, lc: "red" },
+          p0: { lw: 1, lc: "blue" },
+          p1: { lw: 1, lc: "gold" },
+          foot00: { lw: 2, lc: "0x88009955" },
+          foot01: { lw: 2, lc: "0x88999900" },
+          foot10: { lw: 2, lc: "0x88990055" },
+          foot11: { lw: 2, lc: "0x8800FF00" },
+          fl00: { lw: 2, lc: "0x8800FF00" },
+        },
+      } ;
+      
+      Gnuplot::directMulti3dPlot([:l0, :p0, :p1,
+                                  :foot00, :foot01,
+                                  :foot10, :foot11,
+                                  :fl00,
+                                 ], gconf){|gplot|
+        l0.draw(gplot, :l0) ;
+        p0.draw(gplot, :p0) ;
+        p1.draw(gplot, :p1) ;
+        foot00.draw(gplot, :foot00) ;
+        foot01.draw(gplot, :foot01) ;
+        foot10.draw(gplot, :foot10) ;
+        foot11.draw(gplot, :foot11) ;
+        fl00.draw(gplot, :fl00) ;
+      }
     end
+
+    #----------------------------------------------------
+    #++
+    ## 線分との最近線分(closest with line)
+    def test_d
+      l0 = LineSegment.new([0,0,0],[1,1,1]) ;
+      l1 = LineSegment.new([1,0,0],[1,1,0]) ;
+      l2 = LineSegment.new([-1,0,-1],[-1,0,1]) ;
+      p [:ll, l0.to_a, l1.to_a, l2.to_a] ;
+      
+      d01 = l0.closestLineSegmentWith(l1) ;
+      p [:d01, d01.to_a] ;
+      d02 = l0.closestLineSegmentWith(l2) ;
+#      d02 = l0.closestLineSegmentWith(l2, true) ;
+      p [:d02, d02.to_a] ;
+
+      gconf = {
+        styleTable: {
+        },
+      } ;
+      Gnuplot::directMulti3dPlot([:l0, :l1, :l2, :d01, :d02], gconf){|gplot|
+        l0.draw(gplot, :l0) ;
+        l1.draw(gplot, :l1) ;
+        l2.draw(gplot, :l2) ;
+        d01.draw(gplot, :d01) ;
+        d02.draw(gplot, :d02) ;
+      }
+      
+      
+    end
+    
     
 
   end # class TC_Foo < Test::Unit::TestCase

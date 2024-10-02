@@ -49,6 +49,16 @@ module Geo3D
   ## huge number used in normalizeAngle
   HugeAngle = 1.0e5 ;
   
+  ## EPS
+  EPS = 1.0e-10 ;
+
+  #--------------------------------------------------------------
+  #++
+  ## almost zero.
+  def isAlmostZero(_value, _eps = EPS)
+    return (_value < _eps && _value > -_eps) ;
+  end
+  
   #--------------------------------------------------------------
   #++
   ## convert degree to radian

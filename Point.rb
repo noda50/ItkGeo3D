@@ -74,6 +74,18 @@ class Point < Vector
   end
 
   #--////////////////////////////////////////////////////////////
+  # Draw
+  #--------------------------------------------------------------
+  #++ 
+  ## draw by gnuplot
+  ## _gplot_:: a Gnuplot object.
+  ## _drawId_:: key in multi-plot.
+  def draw(_gplot, _drawId = self.drawId())
+    _line = [to_a()] ;
+    _gplot.dm3pPlotLine(_drawId, _line) ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
   #--------------------------------------------------------------
   #++
   ## distance to other point.
@@ -145,6 +157,7 @@ if($0 == __FILE__) then
       v1 = Point.new(5,5,5) ;
       p [:distanceTo, v0.distanceTo(v1)] ;
       p [:distanceFrom, v0.distanceFrom(v1)] ;
+      p [:plotId, v0.plotId] ;
     end
     
 
