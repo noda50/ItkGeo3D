@@ -77,6 +77,43 @@ class LineSegment < GeoObject
     return self ;
   end
 
+  #--::::::::::::::::::::::::::::::::::::::::
+  #------------------------------------------
+  #++
+  ## ensure a Point
+  ## _aValue_:: a Point, Vector or [_x_, _y_]
+  ## *return* :: a Point
+  def self.sureGeoObject(_aValue)
+    case _aValue ;
+    when self ;
+      return _aValue ;
+    when Array ;
+      return self.new(*_aValue) ;
+    else
+      raise ("#{self}::sureGeoObject() does not support conversion from : " +
+             _aValue.inspect) ;
+    end
+  end
+
+  #--::::::::::::::::::::::::::::::::::::::::
+  #------------------------------------------
+  #++
+  ## ensure a Point. (for class)
+  ## _aValue_:: a Point, Vector or [_x_, _y_]
+  ## *return* :: a Point
+  def self.sureLineSegment(_aValue) ;
+    return self.sureGeoObject(_aValue) ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## ensure a Point
+  ## _aValue_:: a Point, Vector or [_x_, _y_]
+  ## *return* :: a Point
+  def sureLineSegment(_aValue) ;
+    return sureGeoObject(_aValue) ;
+  end
+
   #------------------------------------------
   #++
   ## duplicate
@@ -109,10 +146,40 @@ class LineSegment < GeoObject
 
   #------------------------------------------
   #++
-  ## difference Vector
-  ## *return*:: a difference Vector.
-  def diffVector()
+  ## direction(difference) Vector
+  ## *return*:: a direction Vector.
+  def direction()
     return @v - @u ;
+  end
+
+  #------------------------------------------
+  #++
+  ## angle of direction with another LineSegment.
+  ## _line_:: another LineSegment
+  ## *return*:: angle in Rad.
+  def angleWith(_line)
+    _cos = self.cosWith(_line) ;
+    return Math.acos(_cos) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## angle with another LineSegment in degree
+  ## _line_:: another LineSegment
+  ## *return*:: angle in Deg
+  def angleWithInDeg(_line)
+    return rad2deg(angleWith(_line)) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## cosine value direction vector with another LineSegment
+  ## _line_:: another LineSegment
+  ## *return*:: a difference Vector.
+  def cosWith(_line)
+    _line = self.class()::sureGeoObject(_line) ;
+    _inner = self.direction().innerProd(_line.direction()) ;
+    return (_inner.to_f / (self.length() * _line.length())) ;
   end
 
   #--////////////////////////////////////////////////////////////
@@ -123,8 +190,8 @@ class LineSegment < GeoObject
   ## _point_:: 垂線推薦を下ろす点。
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
-  def footPointRatioFrom(_point, _extendP = true)
-    _diff = self.diffVector() ;
+  def footPointFractionFrom(_point, _extendP = true)
+    _diff = self.direction() ;
     _rVec = _point - @u ;
     _d = _diff.sqLength() ;
     _k = ((_d == 0.0) ? 0.0 : (_diff.innerProd(_rVec).to_f / _d) ) ;
@@ -147,7 +214,7 @@ class LineSegment < GeoObject
   ## _point_:: 垂線を下ろす点
   ## _extendP_:: 線分の延長線上を許すかどうか。許さない場合、端点となる。
   def footPointSpanFrom(_point, _extendP = true)
-    _k = footPointRatioFrom(_point, _extendP) ;
+    _k = footPointFractionFrom(_point, _extendP) ;
     return _k * length() ;
   end
 
@@ -157,9 +224,9 @@ class LineSegment < GeoObject
   ## _point_:: 垂線を下ろす点
   ## _extendP_:: 線分の延長線上を許すかどうか。許さない場合、端点となる。
   def footPointFrom(_point, _extendP = false)
-    _k = footPointRatioFrom(_point, _extendP) ;
+    _k = footPointFractionFrom(_point, _extendP) ;
 
-    _foot = @u + diffVector().amp(_k) ;
+    _foot = @u + direction().amp(_k) ;
 
     return _foot ;
   end
@@ -208,8 +275,8 @@ class LineSegment < GeoObject
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: [p,q] の組。
   def closestFractionPairWith(_line, _extendP = false)
-    _dU = self.diffVector() ;
-    _dV = _line.diffVector() ;
+    _dU = self.direction() ;
+    _dV = _line.direction() ;
     _dUV = _line.u - self.u ;
     _a = _dU.innerProd(_dU) ;
     _b = _dV.innerProd(_dV) ;
@@ -227,10 +294,25 @@ class LineSegment < GeoObject
     end
 
     if(!_extendP) then
-      _p = 0.0 if(_p < 0.0) ;
-      _p = 1.0 if(_p > 1.0) ;
-      _q = 0.0 if(_q < 0.0) ;
-      _q = 1.0 if(_q > 1.0) ;
+      _newP = _p ;
+      _newQ = _q ;
+      _newP = 0.0 if(_p < 0.0) ;
+      _newP = 1.0 if(_p > 1.0) ;
+      _newQ = 0.0 if(_q < 0.0) ;
+      _newQ = 1.0 if(_q > 1.0) ;
+      if(_newP != _p && _newQ != _q) then
+        # do nothing
+      elsif(_newP != _p) then ## 一方だけ端点の場合、計算し直し。
+        _pointP = (_newP == 0.0 ? self.u : self.v) ;
+        _q = _line.footPointFractionFrom(_pointP, _extendP) ;
+        _p = _newP ;
+      elsif(_newQ != _q) then ## 一方だけ端点の場合、計算し直し。
+        _pointQ = (_newQ == 0.0 ? _line.u : _line.v) ;
+        _p = self.footPointFractionFrom(_pointQ, _extendP) ;
+        _q = _newQ ;
+      else
+        # do nothing
+      end
     end
 
     return [_p, _q] ;
@@ -492,11 +574,19 @@ if($0 == __FILE__) then
         d01.draw(gplot, :d01) ;
         d02.draw(gplot, :d02) ;
       }
-      
-      
     end
-    
-    
+
+    #----------------------------------------------------
+    #++
+    ## cosine and angle
+    def test_e
+      l0 = LineSegment.new([0,1,1],[0,0,0]) ;
+      l1 = LineSegment.new([0,1,1],[1,1,0]) ;
+      p [:l01, l0.to_a, l1.to_a] ;
+      p [:angleDeg01, l0.angleWithInDeg(l1)] ;
+      p [:angleDeg10, l1.angleWithInDeg(l0)] ;
+      p [:angleDeg00, l0.angleWithInDeg(l0)] ;
+    end
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
