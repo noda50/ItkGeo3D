@@ -137,9 +137,8 @@ class LineSegment < GeoObject
 
   #------------------------------------------
   #++
-  ## shift
-  ## _drift_:: amount of drift. a Vector.
-  ## *return*:: a shifted Vector.
+  ## length
+  ## *return*:: length of LineSegment.
   def length()
     return @u.distanceTo(@v)
   end
