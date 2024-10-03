@@ -146,9 +146,18 @@ class LineSegment < GeoObject
   #------------------------------------------
   #++
   ## direction(difference) Vector
+  ## _unitP_:: if false, return difference vector of @v and @u.
+  ##           if true, return unit vector.
+  ##           if numeric, return unit vector of a certain length.
   ## *return*:: a direction Vector.
-  def direction()
-    return @v - @u ;
+  def direction(_unitP = true)
+    _diff = @v - @u ;
+    _unitP = 1.0 if(_unitP && !_unitP.is_a?(Numeric)) ;
+    if(_unitP) then
+      return _diff.unit(_unitP) ;
+    else
+      return _diff ;
+    end
   end
 
   #------------------------------------------
@@ -177,8 +186,19 @@ class LineSegment < GeoObject
   ## *return*:: a difference Vector.
   def cosWith(_line)
     _line = self.class()::sureGeoObject(_line) ;
-    _inner = self.direction().innerProd(_line.direction()) ;
-    return (_inner.to_f / (self.length() * _line.length())) ;
+    _inner = self.direction(true).innerProd(_line.direction(true)) ;
+    return _inner ;
+  end
+
+  #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## 線分の途中。
+  ## _midPoint_ = _frac_ * @v + (1 - _frac_) * @u
+  ## _frac_:: 割合
+  ## *return*:: Point
+  def midPoint(_frac = 0.5)
+    return @v.midPointWith(@u, _frac) ;
   end
 
   #--////////////////////////////////////////////////////////////
@@ -190,7 +210,7 @@ class LineSegment < GeoObject
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   def footPointFractionFrom(_point, _extendP = true)
-    _diff = self.direction() ;
+    _diff = self.direction(false) ;
     _rVec = _point - @u ;
     _d = _diff.sqLength() ;
     _k = ((_d == 0.0) ? 0.0 : (_diff.innerProd(_rVec).to_f / _d) ) ;
@@ -213,8 +233,8 @@ class LineSegment < GeoObject
   ## _point_:: 垂線を下ろす点
   ## _extendP_:: 線分の延長線上を許すかどうか。許さない場合、端点となる。
   def footPointSpanFrom(_point, _extendP = true)
-    _k = footPointFractionFrom(_point, _extendP) ;
-    return _k * length() ;
+    _frac = footPointFractionFrom(_point, _extendP) ;
+    return _frac * length() ;
   end
 
   #------------------------------------------
@@ -225,11 +245,12 @@ class LineSegment < GeoObject
   def footPointFrom(_point, _extendP = false)
     _k = footPointFractionFrom(_point, _extendP) ;
 
-    _foot = @u + direction().amp(_k) ;
+    _foot = @u + direction(false).amp(_k) ;
 
     return _foot ;
   end
-  
+
+
   #--////////////////////////////////////////////////////////////
   # 2線分の最近点
   #--------------------------------------------------------------
@@ -273,7 +294,7 @@ class LineSegment < GeoObject
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: [p,q] の組。
-  def closestFractionPairWith(_line, _extendP = false)
+  def closestFractionPairFrom(_line, _extendP = false)
     _dU = self.direction() ;
     _dV = _line.direction() ;
     _dUV = _line.u - self.u ;
@@ -282,7 +303,7 @@ class LineSegment < GeoObject
     _c = _dU.innerProd(_dV) ;
     _g = _dUV.innerProd(_dU) ;
     _h = _dUV.innerProd(_dV) ;
-    _det = _c^2 - _a * _b ;
+    _det = _c**2 - _a * _b ;
 
     if(isAlmostZero(_det)) then
       _p = 0.0 ;
@@ -300,7 +321,8 @@ class LineSegment < GeoObject
       _newQ = 0.0 if(_q < 0.0) ;
       _newQ = 1.0 if(_q > 1.0) ;
       if(_newP != _p && _newQ != _q) then
-        # do nothing
+        _p = _newP ;
+        _q = _newQ ;
       elsif(_newP != _p) then ## 一方だけ端点の場合、計算し直し。
         _pointP = (_newP == 0.0 ? self.u : self.v) ;
         _q = _line.footPointFractionFrom(_pointP, _extendP) ;
@@ -324,10 +346,10 @@ class LineSegment < GeoObject
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: self と _line_ 上の点の組 [p,q]。
-  def closestPointPairWith(_line, _extendP = false)
-    (_p, _q) = self.closestFractionPairWith(_line, _extendP) ;
-    _pointP = self.u * (1.0-_p) + self.v * _p ;
-    _pointQ = _line.u * (1.0-_q) + _line.v * _q ;
+  def closestPointPairFrom(_line, _extendP = false)
+    (_p, _q) = self.closestFractionPairFrom(_line, _extendP) ;
+    _pointP = self.midPoint(_p) ;
+    _pointQ = _line.midPoint(_q) ;
     return [_pointP, _pointQ] ;
   end
 
@@ -338,8 +360,8 @@ class LineSegment < GeoObject
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: 最短距離。
-  def closestDistanceWith(_line, _extendP = false)
-    (_pointP, _pointQ) = self.closestPointPairWith(_line, _extendP) ;
+  def closestDistanceFrom(_line, _extendP = false)
+    (_pointP, _pointQ) = self.closestPointPairFrom(_line, _extendP) ;
     return _pointP.distanceTo(_pointQ) ;
   end
 
@@ -350,9 +372,41 @@ class LineSegment < GeoObject
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: 最短距離となる LineSegment
-  def closestLineSegmentWith(_line, _extendP = false)
-    (_pointP, _pointQ) = self.closestPointPairWith(_line, _extendP) ;
+  def closestLineSegmentFrom(_line, _extendP = false)
+    (_pointP, _pointQ) = self.closestPointPairFrom(_line, _extendP) ;
     return self.class.new(_pointP, _pointQ) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 2つの線分の最短距離となる点などの情報をまとめて取得
+  ## _line_:: もう一つの LineSetment
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: [_distance_, _lineSegment_, [_fracSelf_, _fracOther_]]
+  ##            _lineSegment_:: 最短距離となる線分。
+  def distanceInfoToLine(_line, _extendP = false)
+    (_fracSelf, _fracOther) = self.closestFractionPairFrom(_line, _extendP) ;
+    _line = self.class.new(self.midPoint(_fracSelf),
+                           _line.midPoint(_fracOther)) ;
+    return [_line.length(), _line, [_fracSelf, _fracOther]] ;
+  end
+
+  alias distanceInfoToLineSegment distanceInfoToLine ;
+  
+  #------------------------------------------
+  #++
+  ## 頂点との距離情報
+  ## _point_:: a Point
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: [_distance_, _footPoint_, _frac_]
+  ##            _frac_:: 垂線の足の線分上の分率。
+  def distanceInfoToPoint(_point, _extendP = false)
+    _frac = self.footPointFractionFrom(_point, _extendP) ;
+    _foot = self.footPointFrom(_point, _extendP) ;
+    
+    return [_point.distanceTo(_foot), _foot, _frac] ;
   end
 
   #--////////////////////////////////////////////////////////////
@@ -556,10 +610,10 @@ if($0 == __FILE__) then
       l2 = LineSegment.new([-1,0,-1],[-1,0,1]) ;
       p [:ll, l0.to_a, l1.to_a, l2.to_a] ;
       
-      d01 = l0.closestLineSegmentWith(l1) ;
+      d01 = l0.closestLineSegmentFrom(l1) ;
       p [:d01, d01.to_a] ;
-      d02 = l0.closestLineSegmentWith(l2) ;
-#      d02 = l0.closestLineSegmentWith(l2, true) ;
+      d02 = l0.closestLineSegmentFrom(l2) ;
+#      d02 = l0.closestLineSegmentFrom(l2, true) ;
       p [:d02, d02.to_a] ;
 
       gconf = {
@@ -582,9 +636,9 @@ if($0 == __FILE__) then
       l0 = LineSegment.new([0,1,1],[0,0,0]) ;
       l1 = LineSegment.new([0,1,1],[1,1,0]) ;
       p [:l01, l0.to_a, l1.to_a] ;
-      p [:angleDeg01, l0.angleWithInDeg(l1)] ;
-      p [:angleDeg10, l1.angleWithInDeg(l0)] ;
-      p [:angleDeg00, l0.angleWithInDeg(l0)] ;
+      p [:angleDeg01, l0.angleFromInDeg(l1)] ;
+      p [:angleDeg10, l1.angleFromInDeg(l0)] ;
+      p [:angleDeg00, l0.angleFromInDeg(l0)] ;
     end
 
   end # class TC_Foo < Test::Unit::TestCase

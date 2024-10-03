@@ -277,6 +277,114 @@ class LineString < GeoObject
   
 
   #--////////////////////////////////////////////////////////////
+  # distance
+  #--------------------------------------------------------------
+  #++
+  ## distance to Point
+  ## _point_:: a Point
+  ## *return*:: [_distance_, _footPoint_, _lineSegment_, _frac_]
+  ##            _frac_:: 垂線の足の線分上の分率。
+  def distanceInfoToPoint(_point)
+    _minDist = nil ;
+    _minInfo = nil ;
+    self.eachLine{|_line|
+      (_dist, _foot, _frac) = _line.distanceInfoFromPoint(_point, false) ;
+      if(_minDist.nil? || _minDist > _dist) then
+        _minDist = _dist ;
+        _minInfo = [_dist, _foot, _line, _frac] ;
+      end
+    }
+    return _minInfo ;
+  end
+
+  #------------------------------------------
+  #++
+  ## distance to LineSegment
+  ## _lineOther_:: a LineSegment
+  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  def distanceInfoToLine(_lineOther)
+    _minDist = nil ;
+    _minInfo = nil ;
+    self.eachLine{|_lineSelf|
+      (_dist, _segment, _fracPair) =
+        _lineSelf.distanceInfoToLine(_lineOther, false) ;
+      if(_minDist.nil? || _minDist > _dist) then
+        _minDist = _dist ;
+        _minInfo = [_dist, _segment, _lineSelf, _fracPair] ;
+      end
+    }
+    return _minInfo ;
+  end
+
+  #----------------------
+  #++
+  ## distance to LineSegment
+  ## _lineOther_:: a LineSegment
+  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  alias distanceInfoToLineSegment distanceInfoToLine ; 
+
+  #------------------------------------------
+  #++
+  ## distance to LineString
+  ## _stringOther_:: a LineString
+  ## *return*:: [_distance_, _segment_, _linePair_, _fracPair_]
+  ##            _linePair_::= [_lineSelf, _lineOther]
+  ##            _fracPair_::= [_fracSelf, _fracOther]
+  def distanceInfoToLineString(_stringOther)
+    _minDist = nil ;
+    _minInfo = nil ;
+    _stringOther.eachLine{|_lineOther|
+      (_dist, _segment, _lineSelf, _fracPair) =
+        self.distanceInfoToLine(_lineOther) ;
+      if(_minDist.nil? || _minDist > _dist) then
+        _minDist = _dist ;
+        _minInfo = [_dist, _segment, [_lineSelf, _lineOther], _fracPair] ;
+      end
+    }
+    return _minInfo ;
+  end
+
+  #----------------------
+  #++
+  ## distance to LineString
+  ## _stringOther_:: a LineString
+  ## *return*:: _distance_
+  def distanceToLineString(_stringOther)
+    return distanceInfoToLineString(_stringOther).first ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
+  # create shape
+  #--============================================================
+  #--------------------------------------------------------------
+  #++
+  ## create ellipse
+  ## _center_:: center Point.
+  ## _axisA_:: first axis Vector.
+  ## _axisB_:: second axis Vector.
+  ## _nofSeg_:: number of segmentation.
+  ## _closeP_:: flag of close or not.
+  ## _fromAngle_:: start angle.
+  ## _toAngle_:: end angle.
+  def self.newEllipticPath(_center, _axisA, _axisB,
+                           _nofSeg = 16, _closeP = false,
+                           _fromAngle = 0.0, _toAngle = 2 * PI)
+    _center = PointClass.sureGeoObject(_center) ;
+    _axisA = VectorClass.sureGeoObject(_axisA) ;
+    _axisB = VectorClass.sureGeoObject(_axisB) ;
+    _dAngle = (_toAngle - _fromAngle)/_nofSeg.to_f ;
+
+    _pointList = [] ;
+    (0..._nofSeg).each{|_k|
+      _angle = _fromAngle + _k * _dAngle ;
+      _point = _center + _axisA.ellipticMixtureWith(_axisB, _angle) ;
+      _pointList.push(_point) ;
+    }
+
+    return self.new(_pointList, _closeP) ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
   # convert
   #--------------------------------------------------------------
   #++
@@ -358,7 +466,7 @@ if($0 == __FILE__) then
 
     #----------------------------------------------------
     #++
-    ## about test_a
+    ## create and draw
     def test_a
       l0 = LineString.new([[0,0,0],[1,0,0],[1,1,0],[1,1,1],[0,1,1],[0,0,1]],
                           true) ;
@@ -372,6 +480,27 @@ if($0 == __FILE__) then
         l1.draw(gplot, :l1) ;
       }
     end
+
+    #----------------------------------------------------
+    #++
+    ## distance
+    def test_b
+      n = 12 ;
+      c0 = LineString.newEllipticPath([2,2,0], [1,0,0], [0,1,0], n, true) ;
+      c1 = LineString.newEllipticPath([1.5,1,0], [1,1,1], [0,0,1], n, false) ;
+
+      (dist, seg, linePair, fracPair) = c0.distanceInfoToLineString(c1) ;
+
+      gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z"} ;
+      Gnuplot::directMulti3dPlot([:c0, :c1, :seg, :l0, :l1], gconf){|gplot|
+        c0.draw(gplot, :c0) ;
+        c1.draw(gplot, :c1) ;
+        seg.draw(gplot, :seg) ;
+        linePair[0].draw(gplot, :l0) ;
+        linePair[1].draw(gplot, :l1) ;
+      }
+    end
+    
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)

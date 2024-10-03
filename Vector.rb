@@ -496,6 +496,38 @@ class Vector < GeoObject
     return @z ;
   end
   
+  #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## 別ベクトルとの混合。
+  ## _mixtureVector_ = _frac_ * self + (1 - _frac_) * _other_
+  ## _other_:: もう1つのベクトル
+  ## _frac_:: 割合
+  ## *return*:: 混合ベクトル
+  def mixtureWith(_other, _frac)
+    _other = self.class.sureGeoObject(_other) ;
+    return (self * _frac + _other * (1.0 - _frac)) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## 別ベクトルとの中点。
+  ## _other_:: もう1つのベクトル
+  ## _frac_:: 割合
+  ## *return*:: 混合ベクトル
+  def midVectorWith(_other, _frac = 0.5)
+    return self.mixtureWith(_other, _frac) ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## 楕円による混合
+  ## _other_:: もう1つのベクトル
+  ## _angle_:: 角度
+  ## *return*:: 混合ベクトル
+  def ellipticMixtureWith(_other, _angle)
+    return (self * Math.cos(_angle) + _other * Math.sin(_angle)) ;
+  end
 
   #--////////////////////////////////////////////////////////////
   #--============================================================
