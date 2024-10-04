@@ -77,6 +77,31 @@ class LineString < GeoObject
     return self ;
   end
 
+  #------------------------------------------
+  #++
+  ## insert Point to nth
+  ## _point_:: a Point.
+  ## _nth_:: insert point. 0..nofPoints
+  def insertPointAt(_point, _nth)
+    @pointList.insert(_nth, _point) ;
+    @lineList = nil ;
+    
+    return @pointList ;
+  end
+
+  #------------------------------------------
+  #++
+  ## remove Point to nth
+  ## _point_:: a Point.
+  ## _nth_:: insert point. 0..nofPoints
+  def removePointAt(_nth)
+    _point = @pointList[_nth] ;
+    @pointList.delete_at(_nth) ;
+    @lineList = nil ;
+    
+    return _point ;
+  end
+
   #--::::::::::::::::::::::::::::::::::::::::
   #------------------------------------------
   #++
@@ -126,7 +151,7 @@ class LineString < GeoObject
       }
       return self.class.new(_pointList) ;
     else
-      return self.dup() ;
+      return self.clone() ;
     end
   end
 
@@ -143,6 +168,22 @@ class LineString < GeoObject
     return self.class.new(_pointList) ;
   end
 
+  #------------------------------------------
+  #++
+  ## number of Points
+  ## *return*:: number of points
+  def nofPoints()
+    return self.pointList.length() ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## number of Points
+  ## *return*:: number of points
+  def nofLines()
+    return self.lineList.length() ;
+  end
+  
   #------------------------------------------
   #++
   ## length
@@ -182,6 +223,18 @@ class LineString < GeoObject
   #++
   ## each LineSegment loop
   def eachLine(&_block) # :yield: _line_, _count_
+    sureLineList() ;
+    _count = 0 ;
+    @lineList.each{|_line|
+      _block.call(_line, _count) ;
+      _count += 1 ;
+    }
+  end
+
+  #-----------------------------------------
+  #++
+  ## ensure @lineList
+  def sureLineList()
     if(@lineList.nil?) then
       @lineList = [] ;
       _prePoint = nil ;
@@ -193,12 +246,23 @@ class LineString < GeoObject
         _prePoint = _point ;
       }
     end
-    
-    _count = 0 ;
-    @lineList.each{|_line|
-      _block.call(_line, _count) ;
-      _count += 1 ;
-    }
+
+    return @lineList ;
+  end
+
+  #-----------------------------------------
+  #++
+  ## nth Point
+  def nthPoint(_nth)
+    return @pointList[_nth] ;
+  end
+
+  #-----------------------------------------
+  #++
+  ## nth LineSegment
+  def nthLine(_nth)
+    sureLineList() ;
+    return @lineList[_nth] ;
   end
   
   #--////////////////////////////////////////////////////////////

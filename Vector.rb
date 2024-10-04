@@ -75,6 +75,15 @@ class Vector < GeoObject
     end
   end
 
+  #------------------------------------------
+  #++
+  ## duplicate
+  ## _deepP_:: deep copy?
+  ## *return* :: a Vector
+  def dup(_deepP = false)
+    return self.clone() ;
+  end
+
   #--::::::::::::::::::::::::::::::::::::::::
   #------------------------------------------
   #++
