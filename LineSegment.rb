@@ -393,6 +393,19 @@ class LineSegment < GeoObject
   end
 
   alias distanceInfoToLineSegment distanceInfoToLine ;
+
+  #----------------------
+  #++
+  ## 頂点との距離情報
+  ## _point_:: a Point
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: distance
+  def distanceToLine(_line, _extendP = false)
+    return distanceInfoToLine(_line, _extendP).first ;
+  end
+  
+  alias distanceToLineSegment distanceToLine ;
   
   #------------------------------------------
   #++
@@ -408,6 +421,18 @@ class LineSegment < GeoObject
     
     return [_point.distanceTo(_foot), _foot, _frac] ;
   end
+
+  #----------------------
+  #++
+  ## 頂点との距離情報
+  ## _point_:: a Point
+  ## _extendP_:: 足として線分外も許すかどうか。
+  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
+  ## *return*:: distance
+  def distanceToPoint(_point, _extendP = false)
+    return distanceInfoToPoint(_point, _extendP).first ;
+  end
+  
 
   #--////////////////////////////////////////////////////////////
   # bbox and min/max XYZ

@@ -74,6 +74,10 @@ class GeoObject
     case(_toGeoObj)
     when Point ;
       return distanceToPoint(_toGeoObj) ;
+    when LineSegment ;
+      return distanceToLineSegment(_toGeoObj) ;
+    when LineString ;
+      return distanceToLineString(_toGeoObj) ;
     else
       raise ("#{self.class}#distanceTo() does not support for _toGeoObj:" +
              _toGeoObj) ;
@@ -91,18 +95,33 @@ class GeoObject
   #------------------------------------------
   #++
   ## distance from other point.
-  ## _fromGeoObj_:: from GeoObject
-  def distanceToPoint(_fromGeoObj)
-    raise ("#{self.class}#distanceToPoint() does not support for _toGeoObj:" +
-           _toGeoObj) ;
+  ## _point_:: from GeoObject
+  def distanceToPoint(_point)
+    return _point.distanceTo(self) ;
   end
 
   #------------------------------------------
   #++
   ## distance from LineSegment
-  ## _fromGeoObj_:: from LineSegment
-  def distanceToLineSegment(_fromGeoObj)
-    return _fromGeoObj.distanceTo(self) ;
+  ## _line_:: from LineSegment
+  def distanceToLineSegment(_line)
+    return _line.distanceTo(self) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## distance from LineString
+  ## _string_:: from LineString
+  def distanceToLineString(_string)
+    return _string.distanceTo(self) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## 接しているかどうか
+  ## _toGeoObj_:: to GeoObject
+  def contactWith(_toGeoObj, _eps = EPS)
+    return (self.distanceTo(_toGeoObj) < _eps)
   end
 
   #--////////////////////////////////////////////////////////////

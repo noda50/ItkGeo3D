@@ -312,9 +312,23 @@ class Vector < GeoObject
   ## *return*:: arccosine value in degree
   def angleInDeg(_other)
     return rad2deg(self.angle(_other)) ;
+
   end
 
-  #------------------------------------------
+  #--------------------------------------------------------------
+  #++
+  ## outer product
+  ## _other_:: other Vector
+  ## *return*:: outer product as a Vector.
+  def outerProd(_other)
+    return self.class.new( self.y * _other.z - self.z * _other.y,
+                           self.z * _other.x - self.x * _other.z,
+                           self.x * _other.y - self.y * _other.x ) ;
+  end
+  
+  #--////////////////////////////////////////////////////////////
+  # rotate by Axis
+  #--------------------------------------------------------------
   #++
   ## rotate around X asis
   ## _angle_:: angle to rotate

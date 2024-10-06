@@ -361,6 +361,15 @@ class LineString < GeoObject
     return _minInfo ;
   end
 
+  #----------------------
+  #++
+  ## distance to Point
+  ## _lineOther_:: a LineSegment
+  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  def distanceToPoint(_point)
+    return distanceInfoToPoint(_point).first ;
+  end
+
   #------------------------------------------
   #++
   ## distance to LineSegment
@@ -385,7 +394,23 @@ class LineString < GeoObject
   ## distance to LineSegment
   ## _lineOther_:: a LineSegment
   ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
-  alias distanceInfoToLineSegment distanceInfoToLine ; 
+  alias distanceInfoToLineSegment distanceInfoToLine ;
+
+  #----------------------
+  #++
+  ## distance to Point
+  ## _lineOther_:: a LineSegment
+  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  def distanceToLine(_line)
+    return distanceInfoToLine(_line).first ;
+  end
+
+  #----------------------
+  #++
+  ## distance to LineSegment
+  ## _lineOther_:: a LineSegment
+  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  alias distanceToLineSegment distanceToLine ;
 
   #------------------------------------------
   #++

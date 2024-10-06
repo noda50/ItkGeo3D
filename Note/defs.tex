@@ -1,0 +1,231 @@
+%%----------------------------------------------------------------------
+%%
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}\def\argmax{\operatorname*{argmax}}
+
+
+%\def\V#1{\mbox{\boldmath $#1$}}
+%\def\M#1{\mbox{\boldmath $#1$}}
+%\def\S#1{\mbox{\boldmath $#1$}}
+%\def\Ts#1{\mbox{\boldmath $#1$}}
+\def\V#1{{\bm{#1}}}  % ベクトル
+\def\M#1{{\bm{#1} }} % 行列
+\def\Ts#1{{\bm{#1}}} % テンソル
+\def\S#1{{\mathbb{#1}}}  % 集合
+
+\def\Va#1{{\overrightarrow{#1}}} % 矢印ベクトル
+
+\def\MtxK#1#2{\left[ \begin{array}[c]{#1} #2 \end{array} \right]}
+\def\Vec#1{\MtxK{c}{#1}}
+\def\Mtxxxx#1{\MtxK{cccc}{#1}}
+\def\Mtxx#1{\MtxK{cc}{#1}}
+\def\Mtx#1{\MtxK{c}{#1}}
+\def\Tsr#1{\MtxK{c}{#1}}
+
+\def\Seq#1{\left\{ #1 \right\}}
+\def\Set#1{\left\{ #1 \right\}}
+\def\Tuple#1{\left< #1 \right>}
+
+% 転置
+%\def\Tr#1{{}^{\mathrm{T}}{#1}}
+\def\Tr#1{{}^{\top}\!{#1}}
+
+%%----------------------------------------------------------------------
+\def\Deg#1{^{\left< #1 \right>}}  % 次数
+\def\Cxc#1{{#1}^{\dagger}} % 複素共役
+
+\def\Abs#1{\left| #1 \right|}
+
+
+\def\Dpd{\times} %% 直積記号 : direct product
+\def\Kpd{\otimes} %% クロネッカー積記号 : Kronecker product
+\def\Apd{\circ} %% アダマール積記号 : Kronecker product
+\def\DpA#1{\bar{#1}}  %% 直積の値の頭につけるアクセント
+
+\def\Ipd{\cdot}  %% 内積
+\def\Opd{\times} %% 外積
+
+\def\MxA#1{\hat{#1}}  %%  混合分布につけるアクセント
+
+%%----------------------------------------------------------------------
+\def\Opt#1{{#1}^{*}}    %% optimum
+\def\Est#1{\hat{#1}}    %% estimate
+\def\Apx#1{\tilde{#1}}  %% approx
+%\def\Tch#1{#1^{*}}       %% teacher
+\def\Tch#1{\overset{\circ}{#1}}       %% teacher
+
+\def\Tm#1{^{\left< #1 \right>}}  % 回数
+
+\def\Ly#1{\langle #1 \rangle}  %% layer
+\def\In{_{\text{\sc in}}{}}
+
+%%----------------------------------------------------------------------
+\def\Av#1{\left|#1\right|}
+\def\SD#1{\sigma_{#1}}
+\def\Var#1{\SD{#1}^2}
+\def\Avg#1{\mu_{#1}}
+\def\Xpt#1{\bar{#1}}  %% 期待値
+
+
+
+\makeatletter
+  \def\@LkS{{\cal L}}    %% likelihood Symbol
+  \def\@LkF[#1]{\@LkS\left(#1\right)}    %% likelihood func.
+  \def\Lk{\@ifnextchar[{\@LkF}{\@LkS}% ]
+         }
+\makeatother
+
+\makeatletter
+  \def\@PrSym{{\cal P}}
+  \def\Pr{\@ifnextchar[{\@Pr}{\@PrSym}% ]
+  }
+  \def\@Pr[#1]{\@PrSym\left(#1\right)}
+
+  %% Gaussian  G[x;\mu,\sigma]
+  \def\@GSym{{\cal G}}        
+  \def\G{\@ifnextchar[{\@G}{\@GSym}% ]
+  }
+  \def\@G[#1]{\@GSym\left(#1\right)}
+
+%% 二項分布・Binomial 
+  \def\@BnSym{{\cal B}}
+  \def\Bn{\@ifnextchar[{\@Bn}{\@BnSym}% ]
+  }
+  \def\@Bn[#1]{\@BnSym\left(#1\right)}
+
+%% 幾何分布・geometric distribution
+  \def\@GmSym{\mathsf{g}}
+  \def\Gm{\@ifnextchar[{\@Gm}{\@GmSym}% ]
+  }
+  \def\@Gm[#1]{\@GmSym\left(#1\right)}
+
+%% noise
+  \def\nz{\epsilon}	
+
+  \def\@KLDivSym{\mathfrak{D}_{_{\mathsf{KL}}}}
+  \def\KLDiv#1{\def\@@foo{#1}\@KLDivSym\ifx\@@foo\empty {} \else \left[ #1 \right] \fi}
+
+%  \def\@LossFuncSym{\mathfrak{L}}
+  \def\@LossFuncSym{\mathcal{L}}
+  \def\LossFunc#1{\def\@@foo{#1}\@LossFuncSym\ifx\@@foo\empty {} \else \left[ #1 \right] \fi}
+
+\makeatother
+
+
+\def\EqDesc#1{\mbox{\ \ \ ; #1}}
+
+
+\makeatletter
+\def\Lp{\@ifnextchar[{\@Lp}{{\cal L}}} %% ラプラス変換 \Lp[f] or \Lp(f)
+\def\@Lp[#1]{\Lp{}\left[#1\right]}
+\def\ILp{\@ifnextchar[{\@ILp}{{\cal L}^{-1}}} %% ラプラス変換 \Lp[f] or \Lp(f)
+\def\@ILp[#1]{\ILp{}\left[#1\right]}
+\makeatother
+
+\def\Conv{\ast}  %% 畳み込み積分 (Convolution Integral)
+\def\Comb#1#2{{}_{#1}C_{#2}}
+
+%%----------------------------------------------------------------------
+\def\argmin{\operatorname*{argmin}}
+\def\argmax{\operatorname*{argmax}}
+\def\Linear{\operatorname{linear}}
+\def\StepFunc{\operatorname{step}}
+\def\SignFunc{\operatorname{sign}}
+\def\Sigmoid{\operatorname{sigmoid}}
+\def\VSigmoid{\mathbf{sigmoid}}
+\def\BSigmoid{\operatorname{bi\_sigmoid}}
+\def\ErrorFunc{\operatorname{erf}}
+\def\ReLU{\operatorname{ReLU}}
+\def\Softplus{\operatorname{softplus}}
+\def\Softmax{\operatorname{softmax}}
+\def\Attention{\operatorname{Attention}}
+
+%%======================================================================
+
+\def\Where{\mbox{\hspace{3em}} ; \mbox{\hspace{1em}}}
+\def\where0pt{\makebox[0pt][l]{\mbox{where}} \nonumber}
+
+
+\def\MyBox#1{{\unitlength=#1 \framebox(1,1){}}}
+\def\MyFillBox#1{\rule{#1}{#1}}
+\def\EOTH{\hfill\MyBox{.5em}}
+\def\QED{\hfill\MyFillBox{.5em}}
+
+\newenvironment{Note}[1]{%
+%  \paragraph*{ノート: #1} \fill \rule{0.5\textwidth}{1pt}
+  \paragraph{\protect\MyFillBox{1em} ノート--- #1} \hrule%
+  \hfill 
+}{%
+  \hfill\MyBox{1em}\hrule
+  \ \\
+}
+
+%%======================================================================
+
+\newif\ifWideBoxedEqnarray
+\WideBoxedEqnarraytrue
+\WideBoxedEqnarrayfalse
+
+\newenvironment{BoxedEqnarray}{%
+  \vspace{-4ex}
+  \begin{center}%
+    \begin{tabular}[c]{|c|} \hline%
+      \begin{minipage}[c]{\textwidth}  %{width}
+      \ifWideBoxedEqnarray%
+        \vspace{-0.5ex} %
+      \else%
+        \vspace{-2.3ex} %
+      \fi%
+        \begin{eqnarray}%
+}{%
+        \end{eqnarray}%
+      \end{minipage}%
+      \ifWideBoxedEqnarray%
+        \\%
+      \else%
+        % nothing
+      \fi%
+%      \\
+      \\ \hline%
+    \end{tabular}
+  \end{center}%
+}
+
+%%======================================================================
+
+\def\DefPrefix{定義}
+\def\LemmaPrefix{補題}
+\def\TheoremPrefix{定理}
+\newtheorem{genericTheorems}{GenericTheorem}[section]
+\newtheorem{xDef}[genericTheorems]{\DefPrefix}
+\newtheorem{xLemma}[genericTheorems]{\LemmaPrefix}
+\newtheorem{xTheorem}[genericTheorems]{\TheoremPrefix}
+
+\newenvironment{Lemma}{%
+  \begin{xLemma}%
+    \addcontentsline{toc}{subparagraph}{%
+      \fbox{\LemmaPrefix \thexLemma}}
+  \ \\
+}{%
+  \EOTH%
+  \end{xLemma}%
+}
+
+\newenvironment{Theorem}{%
+  \begin{xTheorem}%
+    \addcontentsline{toc}{subparagraph}{%
+      \fbox{\TheoremPrefix \thexLemma}}
+  \ \\
+}{%
+  \EOTH
+  \end{xTheorem}%
+}
+
+
+%%======================================================================
+% 数式中のコメントのためのタブ
+\def\ComTab{\mbox{\;\; ; \;\;}}
+
+

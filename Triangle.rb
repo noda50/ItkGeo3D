@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 ## -*- mode: ruby; coding: utf-8 -*-
-## = Geo3D Ring class
+## = Geo3D Triangle class
 ## Author:: Itsuki Noda
 ## Version:: 0.0 2024/10/04 I.Noda
 ##
@@ -27,13 +27,13 @@ $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;
 
-require 'LineString.rb' ;
+require 'Ring.rb' ;
 
 module Itk ; module Geo3D ;
 #--======================================================================
 #++
 ## description of class Foo.
-class Ring < LineString
+class Triangle < Ring
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #++
   ## default values for WithConfParam#getConf(_key_).
@@ -43,7 +43,7 @@ class Ring < LineString
   ## initialize.
   ## _pointList_:: Array of Point.
   def initialize(_pointList)
-    super(_pointList, true) ;
+    super(_pointList) ;
   end
 
   #------------------------------------------
@@ -52,6 +52,16 @@ class Ring < LineString
   ## _pointList_:: Array of Point.
   ## _closeP_:: if true, force to close LineString.
   def set(_pointList,_closeP = true)
+    if(_pointList.length() == 0) then
+      raise "Triangle should have three Points.: " + _pointList.inspect() ;
+    elsif(_pointList.length() > 3) then
+      _pointList = _pointList[0,3] ;
+    else
+      while(_pointList.length < 3) do
+        p [:warning, "too short pointList:" + _pointList.inspect] ;
+        _pointList.push(_pointList.first) ;
+      end
+    end
     super(_pointList, true) ;
   end
 
@@ -60,7 +70,7 @@ class Ring < LineString
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #--------------------------------------------------------------
-end # class Ring
+end # class Triangle
 #--======================================================================
 end ; end # module Geo3D ; module Itk
 
