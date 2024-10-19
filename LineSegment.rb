@@ -162,11 +162,22 @@ class LineSegment < GeoObject
 
   #------------------------------------------
   #++
+  ## length on a certain direction
+  ## _dir_:: a Vector of direction.
+  ## *return*:: length of LineSegment along to the direction
+  def lengthOn(_dir)
+    return self.direction(false).innerProd(_dir) ;
+  end
+
+  #------------------------------------------
+  #++
   ## angle of direction with another LineSegment.
   ## _line_:: another LineSegment
   ## *return*:: angle in Rad.
   def angleWith(_line)
     _cos = self.cosWith(_line) ;
+    _cos = Geo3D.bound(_cos, -1.0, 1.0) ; ## for safety.
+
     return Math.acos(_cos) ;
   end
 

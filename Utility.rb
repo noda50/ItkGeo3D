@@ -62,73 +62,83 @@ module Geo3D
   #--------------------------------------------------------------
   #++
   ## convert degree to radian
-  def deg2rad(deg)
-    return deg * Deg2Rad ;
+  def deg2rad(_deg)
+    return _deg * Deg2Rad ;
   end
 
   #--------------------------------------------------------------
   #++
   ## convert radian to degree
-  def rad2deg(rad)
-    return rad * Rad2Deg ;
+  def rad2deg(_rad)
+    return _rad * Rad2Deg ;
   end
 
   #--------------------------------------------------------------
   #++
-  ## normalize angle in radian between -PI and PI
-  def normalizeAngle(ang)
-    ang = 0.0 if (ang > HugeAngle || ang < -HugeAngle) ;
-    ang += DoublePI while(ang < -PI) ;
-    ang -= DoublePI while(ang >  PI) ;
-    return ang ;
+  ## normalize _angle in radian between -PI and PI
+  def normalizeAngle(_ang)
+    _ang = 0.0 if (_ang > HugeAngle || _ang < -HugeAngle) ;
+    _ang += DoublePI while(_ang < -PI) ;
+    _ang -= DoublePI while(_ang >  PI) ;
+    return _ang ;
   end
 
   #--------------------------------------------------------------
   #++
   ## normalize angle in degree between -180 and 180
-  def normalizeAngleDeg(ang)
-    ang += 360.0 while(ang < -180.0) ;
-    ang -= 360.0 while(ang >  180.0) ;
-    return ang ;
+  def normalizeAngleDeg(_ang)
+    _ang += 360.0 while(_ang < -180.0) ;
+    _ang -= 360.0 while(_ang >  180.0) ;
+    return _ang ;
   end
 
   #--------------------------------------------------------------
   #++
   ## choose minimum value
-  def min(*value)
-    return value.min() ;
+  def min(*_values)
+    return _values.min() ;
   end
 
   #--------------------------------------------------------------
   #++
   ## choose maximum value
-  def max(*value)
-    return value.max() ;
+  def max(*_values)
+    return _values.max() ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## bound
+  ## _value_:: a Numeric to be bounded.
+  ## _min_:: minimum of the bounding range
+  ## _max_:: maximum of the bounding range
+  def bound(_value, _min, _max)
+    return min(max(_value,_min),_max)
   end
 
   #--------------------------------------------------------------
   #++
   ## absolute value
-  def abs(value)
-    return ((value >= 0.0) ? value : -value) ;
+  def abs(_value)
+    return ((_value >= 0.0) ? _value : -_value) ;
   end
 
   #--------------------------------------------------------------
   #++
   ## float random value
-  def fltRand(min, max)
-    w = max - min ;
-    return min + w * rand(0) ;
+  def fltRand(_min, _max)
+    _w = _max - _min ;
+    return min + _w * rand(0) ;
   end
     
   #--------------------------------------------------------------
   #++
   ## angle order check
-  def isAnglesInOrder(first, second, third)
+  def isAnglesInOrder(_first, _second, _third)
     # suppose each angle is less than PI if angles are in order.
-    angleFirstSecond = normalizeAngle(second - first) ;
-    angleSecondThird = normalizeAngle(third - second) ;
-    return angleFirstSecond >= 0.0 && angleSecondThird >= 0.0 ;
+    _angleFirstSecond = normalizeAngle(_second - _first) ;
+    _angleSecondThird = normalizeAngle(_third - _second) ;
+    return _angleFirstSecond >= 0.0 && _angleSecondThird >= 0.0 ;
   end
 
   #--////////////////////////////////////////////////////////////

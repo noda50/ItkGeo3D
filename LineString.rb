@@ -233,6 +233,27 @@ class LineString < GeoObject
 
   #-----------------------------------------
   #++
+  ## each Angle between two LineSegment
+  ## _angleUnit_:: :rad or :deg
+  def eachAngle(_angleUnit = :rad,
+                &_block) # :yield: _angle_, _preLine_, _postLine_
+    _preLine = nil ;
+    self.eachLine{|_line|
+      if(!_preLine.nil?) then
+        case(_angleUnit) ;
+        when :rad ; _angle = _preLine.angleWith(_line) ;
+        when :deg ; _angle = _preLine.angleWithInDeg(_line) ;
+        else ;
+          raise "_angleUnit_ should be :rad or :deg: " + _angleUnit.inspect ;
+        end
+        _block.call(_angle, _preLine, _line) ;
+      end
+      _preLine = _line ;
+    }
+  end
+
+  #-----------------------------------------
+  #++
   ## ensure @lineList
   def sureLineList()
     if(@lineList.nil?) then
@@ -490,15 +511,22 @@ class LineString < GeoObject
   #++
   ## to Hash
   def to_h()
-    return { pointList: self.to_a() } ;
+    _pointList = [] ;
+    self.eachPoint{|_point|
+      _pointList.push(_point.to_h) ;
+    }
+    return { pointList: _pointList } ;
   end
 
   #------------------------------------------
   #++
   ## to json
   def toJson()
-    _json = { class: self.class.to_s } ;
-    _json.update(to_h()) ;
+    _pointList = [] ;
+    self.eachPoint{|_point|
+      _pointList.push(_point.toJson) ;
+    }
+    _json = { class: self.class.to_s, pointList: _pointList } ;
     return _json ;
   end
 
