@@ -306,8 +306,8 @@ class LineSegment < GeoObject
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
   ## *return*:: [p,q] の組。
   def closestFractionPairFrom(_line, _extendP = false)
-    _dU = self.direction() ;
-    _dV = _line.direction() ;
+    _dU = self.direction(false) ;
+    _dV = _line.direction(false) ;
     _dUV = _line.u - self.u ;
     _a = _dU.innerProd(_dU) ;
     _b = _dV.innerProd(_dV) ;
@@ -675,6 +675,25 @@ if($0 == __FILE__) then
       p [:angleDeg01, l0.angleFromInDeg(l1)] ;
       p [:angleDeg10, l1.angleFromInDeg(l0)] ;
       p [:angleDeg00, l0.angleFromInDeg(l0)] ;
+    end
+
+    #----------------------------------------------------
+    #++
+    ## 線分との最近線分(closest with line) again
+    def test_d
+      bar1 = LineSegment.new([8,3,3],[5,2,5]) ;
+      baz1 = LineSegment.new([2,2,2],[7,2,7]) ;
+
+      (dist, segment, fracPair) = bar1.distanceInfoToLine(baz1) ;
+
+      p [:dist, dist] ;
+      
+      gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z"} ;
+      Gnuplot::directMulti3dPlot([:bar1, :baz1, :segment], gconf){|gplot|
+        bar1.draw(gplot, :bar1) ;
+        baz1.draw(gplot, :baz1) ;
+        segment.draw(gplot, :segment) ;
+      }
     end
 
   end # class TC_Foo < Test::Unit::TestCase

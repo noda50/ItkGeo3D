@@ -38,7 +38,11 @@ module Itk ; module Geo3D
 ## 
 class GeoObject
   include Geo3D
+  
   include ItkPp
+  #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  ## pp用オブジェクト名の id のクラス名として、BareName か Full Path か？
+  UseBareClassName = true ;
   
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #++
