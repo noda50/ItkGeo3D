@@ -22,7 +22,7 @@ def $LOAD_PATH.addIfNeed(path, lastP = false)
   end
 end
 
-$LOAD_PATH.addIfNeed("~/lib/ruby");
+#$LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;

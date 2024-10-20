@@ -22,7 +22,7 @@ def $LOAD_PATH.addIfNeed(path, lastP = false)
   end
 end
 
-$LOAD_PATH.addIfNeed("~/lib/ruby");
+#$LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'pp' ;
@@ -542,6 +542,20 @@ class LineString < GeoObject
     }
     _json = { class: self.class.to_s, pointList: _pointList } ;
     return _json ;
+  end
+  
+  #--========================================
+  #------------------------------------------
+  #++
+  ## new from Json
+  ## *return* :: a Vector
+  def self.newByJson(_json)
+    _pointList =
+      _json[:pointList].map{|_point| self::PointClass::newByJson(_point) } ;
+
+    _string = self.new(_pointList) ;
+    
+    return _string ;
   end
 
   #--////////////////////////////////////////////////////////////

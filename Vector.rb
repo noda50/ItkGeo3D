@@ -22,7 +22,7 @@ def $LOAD_PATH.addIfNeed(path, lastP = false)
   end
 end
 
-$LOAD_PATH.addIfNeed("~/lib/ruby");
+#$LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'optparse' ;
@@ -61,7 +61,7 @@ class Vector < GeoObject
   #------------------------------------------
   #++
   ## ensure a Vector.
-  ## _aValue_:: a Vector or [_x_, _y_]
+  ## _aValue_:: a Vector or [_x_, _y_, _z_]
   ## *return* :: a Vector
   def self.sureGeoObject(_aValue)
     case _aValue ;
@@ -88,7 +88,7 @@ class Vector < GeoObject
   #------------------------------------------
   #++
   ## ensure a Vector. (for class)
-  ## _aValue_:: a Vector or [_x_, _y_]
+  ## _aValue_:: a Vector or [_x_, _y_, _z_]
   ## *return* :: a Vector
   def self.sureVector(_aValue) ;
     return self.sureGeoObject(_aValue) ;
@@ -97,7 +97,7 @@ class Vector < GeoObject
   #------------------------------------------
   #++
   ## ensure a Vector. (for instance)
-  ## _aValue_:: a Vector or [_x_, _y_]
+  ## _aValue_:: a Vector or [_x_, _y_, _z_]
   ## *return* :: a Vector
   def sureVector(_aValue) ;
     return sureGeoObject(_aValue) ;
@@ -117,6 +117,25 @@ class Vector < GeoObject
   ## *return* :: a Hash { x: xVal, y: yVal, z: zVal }
   def to_h()
     return { x: @x, y: @y, z: @z } ;
+  end
+
+  #------------------------------------------
+  #++
+  ## convert to Json
+  ## *return* :: a Hash { class: 'Vector', x: xVal, y: yVal, z: zVal }
+  def toJson()
+    _json = { class: self.class.to_s }.update(to_h()) ;
+    return _json ;
+  end
+
+  #--========================================
+  #------------------------------------------
+  #++
+  ## new from Json
+  ## *return* :: a Vector
+  def self.newByJson(_json)
+    _vector = self.new(_json[:x], _json[:y], _json[:z]) ;
+    return _vector ;
   end
 
   #--------------------------------------------------------------
