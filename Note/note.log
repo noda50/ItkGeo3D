@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.2-190908-2.6 (utf8.euc) (TeX Live 2019/Debian) (preloaded format=platex 2024.3.15)  7 OCT 2024 01:00
+This is e-pTeX, Version 3.14159265-p3.8.2-190908-2.6 (utf8.euc) (TeX Live 2019/Debian) (preloaded format=platex 2024.3.15)  20 OCT 2024 16:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -166,33 +166,33 @@ LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
 LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 57.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 58.
 
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 57.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 58.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 72.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 73.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 72.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 73.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 72.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 73.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 72.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 73.
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 76.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 77.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 76.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 77.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 76.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 77.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 76.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 77.
 File: Fig/figure-01.eps Graphic file (type eps)
 <Fig/figure-01.eps>
  [1
@@ -211,14 +211,17 @@ File: Fig/figure-03.eps Graphic file (type eps)
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[4] [5] (./note.aux) ) 
+[4]
+File: Fig/figure-04.eps Graphic file (type eps)
+<Fig/figure-04.eps>
+ [5] (./note.aux) ) 
 Here is how much of TeX's memory you used:
- 2241 strings out of 482790
- 27221 string characters out of 5957636
- 273682 words of memory out of 5000000
- 17544 multiletter control sequences out of 15000+600000
+ 2246 strings out of 482790
+ 27321 string characters out of 5957636
+ 273690 words of memory out of 5000000
+ 17548 multiletter control sequences out of 15000+600000
  555360 words of font info for 113 fonts, out of 8000000 for 9000
  309 hyphenation exceptions out of 8191
  33i,19n,33p,233b,294s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on note.dvi (5 pages, 14424 bytes).
+Output written on note.dvi (5 pages, 15448 bytes).
