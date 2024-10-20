@@ -72,11 +72,17 @@ class LineString < GeoObject
     }
     @pointList.push(@pointList.first) if(_closeP) ;
     
-    @lineList = nil ;
+    resetLineList() ;
 
     return self ;
   end
 
+  #------------------------------------------
+  #++
+  def resetLineList()
+    @lineList = nil ;
+  end
+  
   #------------------------------------------
   #++
   ## insert Point to nth
@@ -84,10 +90,11 @@ class LineString < GeoObject
   ## _nth_:: insert point. 0..nofPoints
   def insertPointAt(_point, _nth)
     @pointList.insert(_nth, _point) ;
-    @lineList = nil ;
+    resetLineList() ;
     
     return @pointList ;
   end
+
 
   #------------------------------------------
   #++
@@ -97,7 +104,7 @@ class LineString < GeoObject
   def removePointAt(_nth)
     _point = @pointList[_nth] ;
     @pointList.delete_at(_nth) ;
-    @lineList = nil ;
+    resetLineList() ;
     
     return _point ;
   end
