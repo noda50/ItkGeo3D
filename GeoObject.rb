@@ -22,9 +22,9 @@ def $LOAD_PATH.addIfNeed(path, lastP = false)
   end
 end
 
-#$LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
-
+$LOAD_PATH.addIfNeed("~/lib/ruby") if(File.identical?(File.dirname(__FILE__),
+                                                      File.dirname($0))) ;
 require 'pp' ;
 require 'WithConfParam.rb' ;
 require 'Itk/ItkPp.rb' ;

@@ -22,7 +22,6 @@ def $LOAD_PATH.addIfNeed(path, lastP = false)
   end
 end
 
-#$LOAD_PATH.addIfNeed("~/lib/ruby");
 $LOAD_PATH.addIfNeed(File.dirname(__FILE__));
 
 require 'optparse' ;
@@ -493,6 +492,29 @@ class Vector < GeoObject
 
     return _newVec ;
   end
+
+  #--////////////////////////////////////////////////////////////
+  #--------------------------------------------------------------
+  #++
+  ## 直交化。self に対し、与えられたベクトル _other_ を直交するまで回転する。
+  ## 計算としては、ベクトル X(=self), Y(=other) に対して、
+  ## Y' = Y + alpha (Y-X) とし、 Y' と X が直交するとする。
+  ## X Y' = X (Y + alpha (Y-X)) = XY + alpha X(Y-X) = 0
+  ## alpha = XY/(X(X-Y))
+  ## Y'' = |Y| * Y'.unit
+  ## _other_:: 回転するベクトル
+  def orthogonalize(_other)
+    _other = self.sureGeoObject(_other) ;
+    _diff = self - _other ;
+    _diff = self - (_other * 0.5) if(isAlmostZero(self.innerProd(_diff))) ;
+      
+    _alpha = self.innerProd(_other) / self.innerProd(_diff) ;
+    _orthoDir = _other - _diff * _alpha ;
+    _orthoVector = _orthoDir.unit(_other.length()) ;
+
+    return _orthoVector ;
+  end
+  
   
   #--////////////////////////////////////////////////////////////
   # bbox and min/max XYZ
@@ -716,6 +738,19 @@ if($0 == __FILE__) then
       p [:rotateByXY0, v.rotate(PI/3, [1, 1, 0], [0,0,0])] ;
       p [:rotateByXYZ0, v.rotate(PI/3, [1, 1, 1], [0,0,0])] ;
     end
+
+    #----------------------------------------------------
+    #++
+    ## rotate by Quaternion
+    def test_g
+      u = Vector.new(1,0,0) ;
+      v = Vector.new(1,1,1) ;
+      w = u.orthogonalize(v) ;
+
+      pp [:vec, u.to_a, v.to_a, w.to_a] ;
+      pp [:innerProd, u.innerProd(w)] ;
+    end
+    
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
