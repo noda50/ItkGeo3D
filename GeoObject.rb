@@ -82,6 +82,8 @@ class GeoObject
       return distanceToLineSegment(_toGeoObj) ;
     when LineString ;
       return distanceToLineString(_toGeoObj) ;
+    when Ellipse ;
+      return distanceToEllipse(_toGeoObj) ;
     else
       raise ("#{self.class}#distanceTo() does not support for _toGeoObj:" +
              _toGeoObj) ;
@@ -118,6 +120,14 @@ class GeoObject
   ## _string_:: from LineString
   def distanceToLineString(_string)
     return _string.distanceTo(self) ;
+  end
+
+  #------------------------------------------
+  #++
+  ## distance from Ellipse
+  ## _ellipse_:: from LineString
+  def distanceToEllipse(_ellipse)
+    return _ellipse.distanceTo(self) ;
   end
 
   #--------------------------------------------------------------
