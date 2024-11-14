@@ -239,10 +239,26 @@ class Ellipse < GeoObject
   ## _other_:: 垂線を下ろす円。
   ## *return*:: [self上の点、other上の点]
   def closestPointPairFromEllipse(_other)
+    _pointPair0 = closestPointPairFromEllipseNaive(_other, 0.0) ;
+    _pointPair1 = closestPointPairFromEllipseNaive(_other, PI) ;
+
+    dist0 = _pointPair0[0].distanceToPoint(_pointPair0[1]) ;
+    dist1 = _pointPair1[0].distanceToPoint(_pointPair1[1]) ;
+
+    return (dist0 < dist1 ? _pointPair0 : _pointPair1) ;
+  end
+  
+  #------------------------------------------
+  #++
+  ## 円弧からの垂線の足の点
+  ## _other_:: 垂線を下ろす円。
+  ## _startAngle_:: 探索を開始する角度。
+  ## *return*:: [self上の点、other上の点]
+  def closestPointPairFromEllipseNaive(_other, _startAngle = 0.0)
     _selfPointPre = nil ;
     _selfPoint = nil
     _otherPointPre = nil ;
-    _otherPoint = _other.arcPoint(0) ;
+    _otherPoint = _other.arcPoint(_startAngle) ;
     until(_otherPointPre &&
           isAlmostZero(_otherPointPre.distanceToPoint(_otherPoint)))
       _selfPointPre = _selfPoint ;
@@ -476,9 +492,36 @@ if($0 == __FILE__) then
         circle2.draw(gplot, :circle2) ;
         distLine2.draw(gplot, :dist2) ;
       }
-      
     end
 
+    #----------------------------------------------------
+    #++
+    ## tricky case
+    def test_c
+      circle0 = Ellipse.new([0,0,0], [0,0,10], [0,10,0]) ;
+      circle1 = Ellipse.new([0,0,-1], [0,0,8], [8,0,0]) ;
+      circle2 = Ellipse.new([0,0,0], [0,0,-10], [0,10,0]) ;
+
+      distPair0 = circle1.closestPointPairFromEllipse(circle0) ;
+      distLine0 = LineSegment.new(*distPair0) ;
+      pp [:pair, distPair0] ;
+      distPair2 = circle1.closestPointPairFromEllipse(circle2) ;
+      distLine2 = LineSegment.new(*distPair2) ;
+      pp [:pair, distPair2] ;
+
+      gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z",
+                xrange: [-11,11], yrange: [-11,11], zrange: [-11,11],
+              } ;
+      Gnuplot::directMulti3dPlot([:circle0, :circle1, :circle2,
+                                  :dist0, :dist2],
+                                 gconf){|gplot|
+        circle0.draw(gplot, :circle0) ;
+        circle1.draw(gplot, :circle1) ;
+        circle2.draw(gplot, :circle2) ;
+        distLine0.draw(gplot, :dist0) ;
+        distLine2.draw(gplot, :dist2) ;
+      }
+    end
     
     
 
