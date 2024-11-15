@@ -213,6 +213,26 @@ class Ellipse < GeoObject
   #------------------------------------------
   #++
   ## 線分からの垂線の足の点
+  ## _geoObject_:: 垂線を下ろす線分。
+  ## *return*:: [円弧上の点、線上の点]
+  def closestPointPairFrom(_geoObject)
+    case(_geoObject)
+    when Point ;
+      _foot = footPointFrom(_geoObject) ;
+      return [_foot, _geoObject] ;
+    when LineSegment ;
+      return closestPointPairFromLineSegment(_geoObject) ;
+    when Ellipse ;
+      return closestPointPairFromEllipse(_geoObject) ;
+    else
+      raise ("closestPointPairFrom() does not support for this class: " +
+             _geoObject.inspect) ;
+    end
+  end
+  
+  #------------------------------------------
+  #++
+  ## 線分からの垂線の足の点
   ## _line_:: 垂線を下ろす線分。
   ## _extendP_:: 線分を延長するかどうか？
   ## *return*:: [円弧上の点、線上の点]
@@ -482,7 +502,7 @@ if($0 == __FILE__) then
                              Point.new(rand() - 0.5,
                                        rand() - 0.5,
                                        rand() - 0.5).unit(d)) ;
-      distPair = circle.closestPointPairFromLineSegment(line) ;
+      distPair = circle.closestPointPairFrom(line) ;
       distLine = LineSegment.new(*distPair) ;
 
       center2 = [0,0,0] ;
@@ -490,7 +510,7 @@ if($0 == __FILE__) then
       axisMinor2 = Vector.new(rand() - 0.5, rand() - 0.5, rand() - 0.5).unit();
       circle2 = Ellipse.new(center2, axisMajor2, axisMinor2) ;
 
-      distPair2 = circle.closestPointPairFromEllipse(circle2) ;
+      distPair2 = circle.closestPointPairFrom(circle2) ;
       distLine2 = LineSegment.new(*distPair2) ;
 
       p [:distPoint, circle.distanceInfoToPoint(point)] ;
@@ -523,10 +543,10 @@ if($0 == __FILE__) then
       circle1 = Ellipse.new([0,0,-1], [0,0,8], [8,0,0]) ;
       circle2 = Ellipse.new([0,0,0], [0,0,-10], [0,10,0]) ;
 
-      distPair0 = circle1.closestPointPairFromEllipse(circle0) ;
+      distPair0 = circle1.closestPointPairFrom(circle0) ;
       distLine0 = LineSegment.new(*distPair0) ;
       pp [:pair, distPair0] ;
-      distPair2 = circle1.closestPointPairFromEllipse(circle2) ;
+      distPair2 = circle1.closestPointPairFrom(circle2) ;
       distLine2 = LineSegment.new(*distPair2) ;
       pp [:pair, distPair2] ;
 
@@ -551,7 +571,7 @@ if($0 == __FILE__) then
       circle = Ellipse.new([0,0,0], [0,0,10], [0,10,0]) ;
       line = LineSegment.new([2,10,10], [-1,-10,-10]) ;
 
-      distPair0 = circle.closestPointPairFromLineSegment(line) ;
+      distPair0 = circle.closestPointPairFrom(line) ;
       distLine0 = LineSegment.new(*distPair0) ;
       pp [:pair, distPair0] ;
       distPair1 = circle.closestPointPairFromLineSegmentNaive(line) ;
