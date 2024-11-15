@@ -217,10 +217,29 @@ class Ellipse < GeoObject
   ## _extendP_:: 線分を延長するかどうか？
   ## *return*:: [円弧上の点、線上の点]
   def closestPointPairFromLineSegment(_line, _extendP = false)
+    _pointPair0 =
+      self.closestPointPairFromLineSegmentNaive(_line, 0.0, _extendP) ;
+    _pointPair1 =
+      self.closestPointPairFromLineSegmentNaive(_line, 1.0, _extendP) ;
+
+    dist0 = _pointPair0[0].distanceToPoint(_pointPair0[1]) ;
+    dist1 = _pointPair1[0].distanceToPoint(_pointPair1[1]) ;
+
+    return (dist0 < dist1 ? _pointPair0 : _pointPair1) ;
+  end
+    
+  #------------------------------------------
+  #++
+  ## 線分からの垂線の足の点
+  ## _line_:: 垂線を下ろす線分。
+  ## _extendP_:: 線分を延長するかどうか？
+  ## *return*:: [円弧上の点、線上の点]
+  def closestPointPairFromLineSegmentNaive(_line, _startFrac = 0.0,
+                                           _extendP = false)
     _arcPointPre = nil ;
     _arcPoint = nil ;
     _linePointPre = nil ;
-    _linePoint = _line.u ;
+    _linePoint = _line.midPoint(_startFrac) ;
     until(_linePointPre &&
           isAlmostZero(_linePointPre.distanceToPoint(_linePoint)))
       _arcPointPre = _arcPoint ;
@@ -239,8 +258,10 @@ class Ellipse < GeoObject
   ## _other_:: 垂線を下ろす円。
   ## *return*:: [self上の点、other上の点]
   def closestPointPairFromEllipse(_other)
-    _pointPair0 = closestPointPairFromEllipseNaive(_other, 0.0) ;
-    _pointPair1 = closestPointPairFromEllipseNaive(_other, PI) ;
+    _pointPair0 =
+      self.closestPointPairFromEllipseNaive(_other, 0.0) ;
+    _pointPair1 =
+      self.closestPointPairFromEllipseNaive(_other, PI) ;
 
     dist0 = _pointPair0[0].distanceToPoint(_pointPair0[1]) ;
     dist1 = _pointPair1[0].distanceToPoint(_pointPair1[1]) ;
@@ -496,7 +517,7 @@ if($0 == __FILE__) then
 
     #----------------------------------------------------
     #++
-    ## tricky case
+    ## tricky case (circle)
     def test_c
       circle0 = Ellipse.new([0,0,0], [0,0,10], [0,10,0]) ;
       circle1 = Ellipse.new([0,0,-1], [0,0,8], [8,0,0]) ;
@@ -523,6 +544,32 @@ if($0 == __FILE__) then
       }
     end
     
+    #----------------------------------------------------
+    #++
+    ## tricky case (line)
+    def test_d
+      circle = Ellipse.new([0,0,0], [0,0,10], [0,10,0]) ;
+      line = LineSegment.new([2,10,10], [-1,-10,-10]) ;
+
+      distPair0 = circle.closestPointPairFromLineSegment(line) ;
+      distLine0 = LineSegment.new(*distPair0) ;
+      pp [:pair, distPair0] ;
+      distPair1 = circle.closestPointPairFromLineSegmentNaive(line) ;
+      distLine1 = LineSegment.new(*distPair1) ;
+      pp [:pair, distPair1] ;
+
+      gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z",
+                xrange: [-11,11], yrange: [-11,11], zrange: [-11,11],
+              } ;
+      Gnuplot::directMulti3dPlot([:circle, :line,
+                                  :dist0, :dist1],
+                                 gconf){|gplot|
+        circle.draw(gplot, :circle) ;
+        line.draw(gplot, :line) ;
+        distLine0.draw(gplot, :dist0) ;
+        distLine1.draw(gplot, :dist1) ;
+      }
+    end
     
 
 

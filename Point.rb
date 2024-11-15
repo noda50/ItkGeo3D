@@ -103,7 +103,7 @@ class Point < Vector
   ## _frac_:: 割合
   ## *return*:: 混合ベクトル
   def midPointWith(_other, _frac = 0.5)
-    return midVectorWith(_other, _frac) ;
+    return self.midVectorWith(_other, _frac) ;
   end
 
   #--////////////////////////////////////////////////////////////
