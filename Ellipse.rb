@@ -38,7 +38,8 @@ module Itk ; module Geo3D ;
 class Ellipse < GeoObject
   #--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   #++
-  ## default values for WithConfParam#getConf(_key_).
+  ## actual Ring class (used in draw)
+  DrawShapeClass = Ring ;
 
   #--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   #++
@@ -164,7 +165,7 @@ class Ellipse < GeoObject
       _pointList.push(_point) ;
     }
 
-    _ring = Ring.new(_pointList) ;
+    _ring = self.class::DrawShapeClass.new(_pointList) ;
 
     return _ring ;
   end
@@ -261,7 +262,7 @@ class Ellipse < GeoObject
     _linePointPre = nil ;
     _linePoint = _line.midPoint(_startFrac) ;
     until(_linePointPre &&
-          isAlmostZero(_linePointPre.distanceToPoint(_linePoint)))
+          _linePointPre.isAlmostSame(_linePoint))
       _arcPointPre = _arcPoint ;
       _arcPoint = self.footPointFrom(_linePoint) ;
       
@@ -300,13 +301,16 @@ class Ellipse < GeoObject
     _selfPoint = nil
     _otherPointPre = nil ;
     _otherPoint = _other.arcPoint(_startAngle) ;
+    _count = 0 ;
     until(_otherPointPre &&
-          isAlmostZero(_otherPointPre.distanceToPoint(_otherPoint)))
+          _otherPointPre.isAlmostSame(_otherPoint))
       _selfPointPre = _selfPoint ;
       _selfPoint = self.footPointFrom(_otherPoint) ;
       
       _otherPointPre = _otherPoint ;
       _otherPoint = _other.footPointFrom(_selfPoint) ;
+
+      _count += 1 ;
     end
 
     return [_selfPoint, _otherPoint] ;

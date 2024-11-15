@@ -278,12 +278,24 @@ class Vector < GeoObject
     return (@x * @x + @y * @y + @z * @z) ;
   end
 
+  #------------------------------------------
+  #++
+  ## check same or not
+  ## *return*:: true or false
+  def isAlmostSame(_other, _eps = EPS)
+    return isAlmostZero((self - _other).length(), _eps) ;
+  end
+
   #--------------------------------------------------------------
   #++
   ## unit vector
   ## _unit_:: unit length. (default = 1.0) ;
   ## *return*:: an unit Vector.
   def unit(_unit = 1.0) ;
+    if(isAlmostZero(self.length())) then
+      raise "can't let zero vector to be unit vector: " + self.inspect ;
+    end
+    
     return self / (self.length()/_unit) ;
   end
 
@@ -294,6 +306,15 @@ class Vector < GeoObject
   ## *return*:: inner product in scalar.
   def innerProd(_other)
     return (self.x * _other.x + self.y * _other.y + self.z * _other.z) ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## check orthogonal or not.
+  ## _other_:: a Vector
+  ## *return*:: true if orthogonal
+  def isAlmostOrthogonal(_other, _eps = EPS)
+    return isAlmostZero(self.innerProd(_other), _eps) ;
   end
 
   #--------------------------------------------------------------
@@ -502,11 +523,17 @@ class Vector < GeoObject
   ## X Y' = X (Y + alpha (Y-X)) = XY + alpha X(Y-X) = 0
   ## alpha = XY/(X(X-Y))
   ## Y'' = |Y| * Y'.unit
+  ## 直交化できない（平行など）場合は、例外を発生する。
   ## _other_:: 回転するベクトル
   def orthogonalize(_other)
     _other = self.sureGeoObject(_other) ;
     _diff = self - _other ;
-    _diff = self - (_other * 0.5) if(isAlmostZero(self.innerProd(_diff))) ;
+    _diff = self - (_other * 0.5) if(self.isAlmostOrthogonal(_diff)) ;
+
+    if(self.isAlmostOrthogonal(_diff)) then ## 平行の場合
+      raise ("can't orthogonalize parallel Vector: " +
+             self.inspect + " // " + _other.inspect) ;
+    end
       
     _alpha = self.innerProd(_other) / self.innerProd(_diff) ;
     _orthoDir = _other - _diff * _alpha ;

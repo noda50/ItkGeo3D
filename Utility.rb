@@ -76,20 +76,52 @@ module Geo3D
   #--------------------------------------------------------------
   #++
   ## normalize _angle in radian between -PI and PI
-  def normalizeAngle(_ang)
+  ## _ang_:: angle in radian.
+  ## _onlyPositiveP_:: use range [0, 2PI]
+  ## *return*:: normalized angle.
+  def normalizeAngle(_ang, _onlyPositiveP = false)
     _ang = 0.0 if (_ang > HugeAngle || _ang < -HugeAngle) ;
     _ang += DoublePI while(_ang < -PI) ;
     _ang -= DoublePI while(_ang >  PI) ;
+
+    _ang += DoublePI if(_onlyPositiveP && _ang < 0.0) ;
+    
     return _ang ;
   end
 
   #--------------------------------------------------------------
   #++
   ## normalize angle in degree between -180 and 180
-  def normalizeAngleDeg(_ang)
+  ## _ang_:: angle in radian.
+  ## _onlyPositiveP_:: use range [0, 360]
+  ## *return*:: normalized angle.
+  def normalizeAngleDeg(_ang, _onlyPositiveP = false)
+    _ang = 0.0 if (_ang > HugeAngle || _ang < -HugeAngle) ;
     _ang += 360.0 while(_ang < -180.0) ;
     _ang -= 360.0 while(_ang >  180.0) ;
+
+    _ang += 360.0 if(_onlyPositiveP && _ang < 0.0) ;
+
     return _ang ;
+  end
+
+  #--------------------------------------------------------------
+  #++
+  ## check angle is in order
+  ## _from_:: smallest angle
+  ## _mid_:: middle angle
+  ## _to_:: largest angle
+  ## _permitSameP_:: flag to return true in the case angles are the same.
+  ## *return*:: true if angles align right order.
+  def isAngleInOrder(_from, _mid, _to, _permitSameP = true)
+    _fromTo = normalizeAngle(_to - _from, true) ;
+    _fromMid = normalizeAngle(_mid - _from, true) ;
+
+    if(_permitSameP) then
+      return (_fromMid >= 0.0 && _fromTo >= _fromMid) ;
+    else
+      return (_fromMid > 0.0 && _fromTo > _fromMid) ;
+    end
   end
 
   #--------------------------------------------------------------
