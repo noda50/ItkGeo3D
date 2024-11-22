@@ -594,8 +594,83 @@ if($0 == __FILE__) then
         distLine1.draw(gplot, :dist1) ;
       }
     end
-    
 
+    #----------------------------------------------------
+    $LOAD_PATH.addIfNeed("~/lib/ruby");
+    require 'Stat/Uniform.rb' ;
+    #++
+    ## distance grap
+    def test_e
+      rRange = Stat::Uniform.new(0.3, 3.0) ;
+      xyzRange = Stat::Uniform.new(-2.0, 2.0) ;
+      dirRange = Stat::Uniform.new(0.0, 1.0) ;
+      nofCircle = 10 ;
+      
+      baseCircle = Ellipse.new([0,0,0], [1,0,0], [0,1,0]) ;
+
+      circleList = [] ;
+      distTab = {} ;
+      minDegTab = {} ;
+      upDownTab = {} ;
+      (0...nofCircle).each{
+        r = rRange.value() ;
+        x = xyzRange.value() ;
+        y = xyzRange.value() ;
+        z = xyzRange.value() ;
+        dx = dirRange.value() ;
+        dy = dirRange.value() ;
+        dz = dirRange.value() ;
+        circle = Ellipse.newCircle([x,y,z], r, [dx, dy, dz]) ;
+        circleList.push(circle) ;
+        distTab[circle] = {} ;
+        upDownTab[circle] = { up: [], down: [] } ;
+        minDist = nil ;
+        minDeg = nil ;
+        preDist = nil ;
+        upDown = nil ;
+        (0...360).each{|deg|
+          point = circle.arcPointInDeg(deg) ;
+          dist = baseCircle.distanceTo(point) ;
+          distTab[circle][deg] = dist ;
+          if(minDist.nil? || minDist > dist) then
+            minDist = dist ;
+            minDeg = deg ;
+          end
+          if(preDist) then
+            if(upDown == :up && dist < preDist) then
+              upDownTab[circle][:up].push([deg-1, preDist]) ;
+            elsif(upDown == :down && dist > preDist) then
+              upDownTab[circle][:down].push([deg-1, preDist]) ;
+            end
+            upDown = ((dist > preDist) ? :up : :down) ;
+          end
+          preDist = dist ;
+        }
+        minDegTab[circle] = minDeg ;
+      }
+
+      pp [:upDown, upDownTab.values] ;
+
+      gconf = { :title => nil,
+               :pathBase => "/tmp/gnuplot_#{$$}",
+#               :xrange => "[0:]",
+#               :yrange => "[0:]",
+               :xlabel => "angle",
+               :ylabel => "distance",
+               :style => "w l",
+#               :term => nil,
+               :tgif => false,
+             } ;
+      Gnuplot::directMultiPlot2(circleList, gconf){|gplot|
+	gplot.command("set key off") ;
+        distTab.each{|circle, dTab|
+          dTab.each{|deg, dist|
+            angle = normalizeAngleDeg(deg - minDegTab[circle]) ;
+            gplot.dmpXYPlot(circle,angle,dist)
+          }
+        }
+      }
+    end
 
   end # class TC_Foo < Test::Unit::TestCase
 end # if($0 == __FILE__)
