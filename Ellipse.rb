@@ -320,101 +320,80 @@ class Ellipse < GeoObject
   #++
   ## 点までの距離関係情報
   ## _point_:: 対象となる Point
-  ## *return*:: [_distance_, _footPoint_, _angle_]
-  def distanceInfoToPoint(_point)
+  ## _detailP_:: flag return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segmentToFootPoint_, [_angle_]]
+  ##            otherwise, return _distance.
+  def distanceToPoint(_point, _detailP = false)
     _angle = self.footPointAngleFrom(_point) ;
     _footPoint = self.arcPoint(_angle) ;
-    _distance = _footPoint.distanceToPoint(_point) ;
+    _segment = LineSegment.new(_footPoint, _point) ;
+    _distance = _segment.length() ;
 
-    return [_distance, _footPoint, _angle] ;
-  end
-  
-  #----------------------
-  #++
-  ## 点までの距離
-  ## _point_:: 対象となる Point
-  ## *return*:: _distance_
-  def distanceToPoint(_point)
-    return distanceInfoToPoint(_point).first ;
+    return (_detailP ? [_distance, _segment, [_angle]] : _distance) ;
   end
   
   #------------------------------------------
   #++
   ## 線分までの距離関係情報
   ## _line_:: 対象となる LineSegment。
-  ## *return*:: [_distance_, _arcPoint_, _linePoint_]。
-  def distanceInfoToLineSegment(_line)
+  ## _detailP_:: flag return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_]
+  ##            where _segment_ is LineSegment from arc point to line point.
+  ##            otherwise, return _distance.
+  def distanceToLineSegment(_line, _detailP = false)
     (_arcPoint, _linePoint) = self.closestPointPairFromLineSegment(_line)
-    _distance = _arcPoint.distanceToPoint(_linePoint) ;
+    _segment = LineSegment.new(_arcPoint, _linePoint) ;
+    _distance = _segment.length() ;
 
-    return [_distance, _arcPoint, _linePoint] ;
-  end
-
-  #----------------------
-  #++
-  ## 線分までの距離
-  ## _line_:: 対象となる LineSegment。
-  ## *return*:: _distance_
-  def distanceToLineSegment(_line)
-    return distanceInfoToLineSegment(_line).first ;
+    return (_detailP ? [_distance, _segment] : _distance) ;
   end
 
   #------------------------------------------
   #++
   ## 折れ線までの距離関係情報
   ## _lineString_:: 対象となる LineString。
-  ## *return*:: [_distance_, _arcPoint_, _linePoint_, _lineSegment_]。
-  def distanceInfoToLineString(_lineString)
+  ## _detailP_:: flag return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_, [_lineSegment_]]
+  ##            where _segment_ is LineSegment from arc point to line point.
+  ##            otherwise, return _distance.
+  def distanceToLineString(_lineString, _detailP = false)
     _minDistance = nil ;
+    _minSegment = nil ;
     _minLine = nil ;
-    _minArcPoint = nil ;
-    _minLinePoint = nil ;
 
     _lineString.eachLine{|_line|
-      (_distance, _arcPoint, _linePoint) =
-        self.distanceInfoToLineSegment(_line) ;
+      (_distance, _segment) = self.distanceToLineSegment(_line, true) ;
       if(_minDistance.nil? || _minDistance > _distance) then
         _minDistance = _distance ;
+        _minSegment = _segment ;
         _minLine = _line ;
-        _minArcPoint = _arcPoint ;
-        _minLinePoint = _linePoint ;
       end
     }
 
-    return [_minDistance, _minArcPoint, _minLinePoint, _line] ;
-  end
-
-  #----------------------
-  #++
-  ## 折れ線までの距離
-  ## _lineString_:: 対象となる LineString。
-  ## *return*:: _distance_
-  def distanceToLineString(_lineString)
-    return distanceInfoToLineString(_lineString).first ;
+    return (_detailP ? [_minDistance, _minSegment, _minLine] : _minDistance) ;
   end
 
   #------------------------------------------
   #++
   ## 円までの距離関係情報
   ## _otherCircle_:: 対象となる Ellipse (円である必要）
-  ## *return*:: [_distance_, _selfPoint_, _otherPoint_]。
-  def distanceInfoToEllipse(_otherCircle)
+  ## _detailP_:: flag return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_]
+  ##            where _segment_ is LineSegment from self point to other point.
+  ##            otherwise, return _distance.
+  def distanceToEllipse(_otherCircle, _detailP = false)
     (_selfPoint, _otherPoint) =
       self.closestPointPairFromEllipse(_otherCircle) ;
-    _distance = _selfPoint.distanceToPoint(_otherPoint) ;
+    _segment = LineSegment.new(_selfPoint, _otherPoint) ;
+    _distance = _segment.length() ;
 
-    return [_distance, _selfPoint, _otherPoint] ;
+    return (_detailP ? [_distance, _segment] : _distance) ;
   end
 
-  #----------------------
-  #++
-  ## 円までの距離
-  ## _otherCircle_:: 対象となる Ellipse (円である必要）
-  ## *return*:: _distance_。
-  def distanceToEllipse(_otherCircle)
-    return distanceInfoToEllipse(_otherCircle).first ;
-  end
-  
   #--////////////////////////////////////////////////////////////
   ## 出力
   #------------------------------------------
@@ -517,9 +496,9 @@ if($0 == __FILE__) then
       distPair2 = circle.closestPointPairFrom(circle2) ;
       distLine2 = LineSegment.new(*distPair2) ;
 
-      p [:distPoint, circle.distanceInfoToPoint(point)] ;
-      p [:distLine, circle.distanceInfoToLineSegment(line)] ;
-      p [:distCircle, circle.distanceInfoToEllipse(circle2)] ;
+      p [:distPoint, circle.distanceToPoint(point, true)] ;
+      p [:distLine, circle.distanceToLineSegment(line, true)] ;
+      p [:distCircle, circle.distanceToEllipse(circle2, true)] ;
 
       gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z",
                 xrange: [-3,3], yrange: [-3,3], zrange: [-3,3],

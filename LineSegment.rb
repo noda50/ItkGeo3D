@@ -392,58 +392,46 @@ class LineSegment < GeoObject
   #++
   ## 2つの線分の最短距離となる点などの情報をまとめて取得
   ## _line_:: もう一つの LineSetment
+  ## _detailP_:: flag to return detailed info.
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
-  ## *return*:: [_distance_, _lineSegment_, [_fracSelf_, _fracOther_]]
-  ##            _lineSegment_:: 最短距離となる線分。
-  def distanceInfoToLine(_line, _extendP = false)
+  ## *return*:: if _detailP_ is true,
+  ##            return [_distance_, _lineSegment_, [_fracSelf_, _fracOther_]]
+  ##            where, _lineSegment_:: 最短距離となる線分。
+  ##            if _detailP_ is false, return just _distance_.
+  def distanceToLine(_line, _detailP = false, _extendP = false)
     (_fracSelf, _fracOther) = self.closestFractionPairFrom(_line, _extendP) ;
-    _line = self.class.new(self.midPoint(_fracSelf),
-                           _line.midPoint(_fracOther)) ;
-    return [_line.length(), _line, [_fracSelf, _fracOther]] ;
+    _line = LineSegment.new(self.midPoint(_fracSelf),
+                            _line.midPoint(_fracOther)) ;
+    return (_detailP ?
+              [_line.length(), _line, [_fracSelf, _fracOther]] :
+              _line.length()) ;
   end
 
-  alias distanceInfoToLineSegment distanceInfoToLine ;
-
-  #----------------------
-  #++
-  ## 頂点との距離情報
-  ## _point_:: a Point
-  ## _extendP_:: 足として線分外も許すかどうか。
-  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
-  ## *return*:: distance
-  def distanceToLine(_line, _extendP = false)
-    return distanceInfoToLine(_line, _extendP).first ;
-  end
-  
   alias distanceToLineSegment distanceToLine ;
-  
+
   #------------------------------------------
   #++
   ## 頂点との距離情報
   ## _point_:: a Point
+  ## _detailP_:: flag to return detailed info.
   ## _extendP_:: 足として線分外も許すかどうか。
   ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
-  ## *return*:: [_distance_, _footPoint_, _frac_]
+  ## *return*:: if _detailP_ is true,
+  ##            return [_distance_, _lineSegment_, [_frac_]]
+  ##            where, _lineSegment_:: 最短距離となる線分。
+  ##            if _detailP_ is false, return just _distance_.
+  ## *return*:: 
   ##            _frac_:: 垂線の足の線分上の分率。
-  def distanceInfoToPoint(_point, _extendP = false)
+  def distanceToPoint(_point, _detailP = false, _extendP = false)
     _frac = self.footPointFractionFrom(_point, _extendP) ;
     _foot = self.footPointFrom(_point, _extendP) ;
+    _line = LineSegment.new(_foot, _point) ;
     
-    return [_point.distanceTo(_foot), _foot, _frac] ;
+    return (_detailP ?
+              [_line.length(), _line, [_frac]] :
+              _line.length()) ;
   end
-
-  #----------------------
-  #++
-  ## 頂点との距離情報
-  ## _point_:: a Point
-  ## _extendP_:: 足として線分外も許すかどうか。
-  ##             線分外を許さない(false)の場合、どちらかの端点(0 or 1)となる。
-  ## *return*:: distance
-  def distanceToPoint(_point, _extendP = false)
-    return distanceInfoToPoint(_point, _extendP).first ;
-  end
-  
 
   #--////////////////////////////////////////////////////////////
   # bbox and min/max XYZ
@@ -683,19 +671,19 @@ if($0 == __FILE__) then
       l0 = LineSegment.new([0,1,1],[0,0,0]) ;
       l1 = LineSegment.new([0,1,1],[1,1,0]) ;
       p [:l01, l0.to_a, l1.to_a] ;
-      p [:angleDeg01, l0.angleFromInDeg(l1)] ;
-      p [:angleDeg10, l1.angleFromInDeg(l0)] ;
-      p [:angleDeg00, l0.angleFromInDeg(l0)] ;
+      p [:angleDeg01, l0.angleWithInDeg(l1)] ;
+      p [:angleDeg10, l1.angleWithInDeg(l0)] ;
+      p [:angleDeg00, l0.angleWithInDeg(l0)] ;
     end
 
     #----------------------------------------------------
     #++
     ## 線分との最近線分(closest with line) again
-    def test_d
+    def test_f
       bar1 = LineSegment.new([8,3,3],[5,2,5]) ;
       baz1 = LineSegment.new([2,2,2],[7,2,7]) ;
 
-      (dist, segment, fracPair) = bar1.distanceInfoToLine(baz1) ;
+      (dist, segment, fracPair) = bar1.distanceToLine(baz1, true) ;
 
       p [:dist, dist] ;
       

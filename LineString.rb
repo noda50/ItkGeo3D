@@ -381,102 +381,83 @@ class LineString < GeoObject
   #++
   ## distance to Point
   ## _point_:: a Point
-  ## *return*:: [_distance_, _footPoint_, _lineSegment_, _frac_]
+  ## _detailP_:: flat to return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _lineToFootPoint_, [_lineSegment_, _frac_]]
   ##            _frac_:: 垂線の足の線分上の分率。
-  def distanceInfoToPoint(_point)
+  ##            otherwise, return _distance.
+  def distanceToPoint(_point, _detailP = false)
     _minDist = nil ;
     _minInfo = nil ;
     self.eachLine{|_line|
-      (_dist, _foot, _frac) = _line.distanceInfoFromPoint(_point, false) ;
+      (_dist, _segment, _frac) = _line.distanceToPoint(_point, true, false) ;
       if(_minDist.nil? || _minDist > _dist) then
         _minDist = _dist ;
-        _minInfo = [_dist, _foot, _line, _frac] ;
+        _minInfo = [_dist, _segment, [_line, _frac]] ;
       end
     }
-    return _minInfo ;
-  end
-
-  #----------------------
-  #++
-  ## distance to Point
-  ## _lineOther_:: a LineSegment
-  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
-  def distanceToPoint(_point)
-    return distanceInfoToPoint(_point).first ;
+    return (_detailP ? _minInfo : _minDist) ;
   end
 
   #------------------------------------------
   #++
   ## distance to LineSegment
   ## _lineOther_:: a LineSegment
-  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
-  def distanceInfoToLine(_lineOther)
+  ## _detailP_:: flag to return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_, [_lineSegment_, [_fracSelf,_fracOther_]]]
+  ##            _frac_:: 垂線の足の線分上の分率。
+  ##            otherwise, return _distance.
+  def distanceToLine(_lineOther, _detailP = false)
     _minDist = nil ;
     _minInfo = nil ;
     self.eachLine{|_lineSelf|
       (_dist, _segment, _fracPair) =
-        _lineSelf.distanceInfoToLine(_lineOther, false) ;
+        _lineSelf.distanceToLine(_lineOther, true, false) ;
       if(_minDist.nil? || _minDist > _dist) then
         _minDist = _dist ;
-        _minInfo = [_dist, _segment, _lineSelf, _fracPair] ;
+        _minInfo = [_dist, _segment, [_lineSelf, _fracPair]] ;
       end
     }
-    return _minInfo ;
+    return (_detailP ? _minInfo : _minDist) ;
   end
 
   #----------------------
   #++
   ## distance to LineSegment
   ## _lineOther_:: a LineSegment
-  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
-  alias distanceInfoToLineSegment distanceInfoToLine ;
-
-  #----------------------
-  #++
-  ## distance to Point
-  ## _lineOther_:: a LineSegment
-  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
-  def distanceToLine(_line)
-    return distanceInfoToLine(_line).first ;
-  end
-
-  #----------------------
-  #++
-  ## distance to LineSegment
-  ## _lineOther_:: a LineSegment
-  ## *return*:: [_distance_, _segment_, _lineSegment_, [_fracSelf,_fracOther_]]
+  ## _detailP_:: flag to return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_, [_lineSegment_, [_fracSelf,_fracOther_]]]
+  ##            _frac_:: 垂線の足の線分上の分率。
+  ##            otherwise, return _distance.
+  ## *return*:: 
   alias distanceToLineSegment distanceToLine ;
 
   #------------------------------------------
   #++
   ## distance to LineString
   ## _stringOther_:: a LineString
-  ## *return*:: [_distance_, _segment_, _linePair_, _fracPair_]
+  ## _detailP_:: flag to return detailed info.
+  ## *return*:: if _detilP is true,
+  ##            return [_distance_, _segment_, [_linePair_, _fracPair_]]
   ##            _linePair_::= [_lineSelf, _lineOther]
   ##            _fracPair_::= [_fracSelf, _fracOther]
-  def distanceInfoToLineString(_stringOther)
+  ##            otherwise, return _distance.
+  def distanceToLineString(_stringOther, _detailP = false)
     _minDist = nil ;
     _minInfo = nil ;
     _stringOther.eachLine{|_lineOther|
-      (_dist, _segment, _lineSelf, _fracPair) =
-        self.distanceInfoToLine(_lineOther) ;
+      (_dist, _segment, (_lineSelf, _fracPair)) =
+        self.distanceToLine(_lineOther, true) ;
       if(_minDist.nil? || _minDist > _dist) then
         _minDist = _dist ;
-        _minInfo = [_dist, _segment, [_lineSelf, _lineOther], _fracPair] ;
+        _minInfo = [_dist, _segment, [[_lineSelf, _lineOther], _fracPair]] ;
       end
     }
-    return _minInfo ;
+    return (_detailP ? _minInfo : _minDist) ;
   end
 
-  #----------------------
-  #++
-  ## distance to LineString
-  ## _stringOther_:: a LineString
-  ## *return*:: _distance_
-  def distanceToLineString(_stringOther)
-    return distanceInfoToLineString(_stringOther).first ;
-  end
-  
   #--////////////////////////////////////////////////////////////
   # create shape
   #--============================================================
@@ -634,7 +615,7 @@ if($0 == __FILE__) then
       c0 = LineString.newEllipticPath([2,2,0], [1,0,0], [0,1,0], n, true) ;
       c1 = LineString.newEllipticPath([1.5,1,0], [1,1,1], [0,0,1], n, false) ;
 
-      (dist, seg, linePair, fracPair) = c0.distanceInfoToLineString(c1) ;
+      (dist, seg, (linePair, fracPair)) = c0.distanceToLineString(c1, true) ;
 
       gconf = { xlabel: "X", ylabel: "Y", zlabel: "Z"} ;
       Gnuplot::directMulti3dPlot([:c0, :c1, :seg, :l0, :l1], gconf){|gplot|
